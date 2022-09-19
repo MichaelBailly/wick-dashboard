@@ -49,14 +49,16 @@
 						data: pnl,
 						backgroundColor: '#c49000',
 						borderColor: 'rgba(0,0,0, 0.4)',
-						borderWidth: 1
+						borderWidth: 1,
+						yAxisID: 'y'
 					},
 					{
 						label: 'Cumulated Pnl',
 						data: cumulatedPnl,
 						backgroundColor: '#00838f',
 						borderColor: 'rgba(0,0,0, 0.4)',
-						borderWidth: 1
+						borderWidth: 1,
+						yAxisID: 'y2'
 					}
 				]
 			},
@@ -74,6 +76,22 @@
 							date: {
 								locale: enUS
 							}
+						}
+					},
+					y: {
+						ticks: {
+							color: '#c49000'
+						}
+					},
+					y2: {
+						type: 'linear',
+						display: true,
+						position: 'right',
+						ticks: {
+							color: '#00838f'
+						},
+						grid: {
+							drawOnChartArea: false
 						}
 					}
 				},
