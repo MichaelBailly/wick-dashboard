@@ -37,7 +37,7 @@
 					<span> <Pnl pnl={type.pnl} />$ - {type.tradeCount} trades</span>
 					<span slot="description" class="primary"
 						>{type.type}
-						<a href="/history/type/{type.watcher.type}/{type.watcher.config}">more...</a></span
+						<a href="/history/{type.watcher.type}/{type.watcher.config}">more...</a></span
 					>
 
 					<IconButton slot="icon" toggle pressed={panelOpened[type.type]}>

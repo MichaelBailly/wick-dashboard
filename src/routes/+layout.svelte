@@ -27,7 +27,6 @@
 	.page-container {
 		display: flex;
 		flex-direction: row;
-		width: 100vw;
 	}
 
 	.main-content {

@@ -15,6 +15,11 @@ export enum SORT_FIELD {
 	SOLD
 }
 
+export type TradeHistoryOpts = {
+	type?: string;
+	config?: string;
+};
+
 export async function getTrades(
 	sortField: SORT_FIELD = SORT_FIELD.SOLD,
 	sort: SORT = SORT.DESC
@@ -37,9 +42,22 @@ export async function getTrades(
 	throw new Error('Unable to fettch trades');
 }
 
-export async function getTradesHistory() {
+type TradeHistoryMongoQuery = {
+	'watcher.type'?: string;
+	'watcher.config'?: string;
+};
+
+export async function getTradesHistory(opts: TradeHistoryOpts = {}) {
+	const query: TradeHistoryMongoQuery = {};
+	if (opts.type && typeof opts.type === 'string') {
+		query['watcher.type'] = opts.type;
+	}
+	if (opts.config && typeof opts.config === 'string') {
+		query['watcher.config'] = opts.config;
+	}
+
 	const collection = await getTradeCollection();
-	const trades = await collection.find().sort({ soldTimestamp: -1 }).toArray();
+	const trades = await collection.find(query).sort({ soldTimestamp: -1 }).toArray();
 
 	const clientTrades = trades.map((t: any) => ({
 		...t,

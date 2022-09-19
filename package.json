@@ -25,6 +25,8 @@
 		"@smui/paper": "^6.1.0",
 		"@smui/select": "^6.1.0",
 		"@smui/switch": "^6.1.0",
+		"@smui/tab": "^6.1.0",
+		"@smui/tab-bar": "^6.1.0",
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/adapter-node": "^1.0.0-next.92",
 		"@sveltejs/kit": "next",
@@ -46,6 +48,8 @@
 	"type": "module",
 	"dependencies": {
 		"@smui/form-field": "^6.1.0",
+		"chart.js": "^3.9.1",
+		"chartjs-adapter-date-fns": "^2.0.0",
 		"date-fns": "^2.29.3",
 		"mongodb": "^4.9.1"
 	}
