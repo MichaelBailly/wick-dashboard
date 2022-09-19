@@ -17,8 +17,16 @@
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.25.0",
+		"@smui-extra/accordion": "^6.1.1",
+		"@smui/button": "^6.1.0",
 		"@smui/data-table": "^6.1.0",
+		"@smui/drawer": "^6.1.0",
+		"@smui/list": "^6.1.0",
+		"@smui/paper": "^6.1.0",
+		"@smui/select": "^6.1.0",
+		"@smui/switch": "^6.1.0",
 		"@sveltejs/adapter-auto": "next",
+		"@sveltejs/adapter-node": "^1.0.0-next.92",
 		"@sveltejs/kit": "next",
 		"@typescript-eslint/eslint-plugin": "^5.27.0",
 		"@typescript-eslint/parser": "^5.27.0",
@@ -37,6 +45,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@smui/form-field": "^6.1.0",
 		"date-fns": "^2.29.3",
 		"mongodb": "^4.9.1"
 	}

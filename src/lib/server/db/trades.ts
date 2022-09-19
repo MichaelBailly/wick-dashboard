@@ -1,3 +1,5 @@
+import type { TradesHistoryResponse } from '$lib/types/TradesHistoryResponse';
+import { format } from 'date-fns';
 import type { TradeRecordClient } from 'src/lib/types/TradeRecordClient';
 import { getTradeCollection } from '.';
 
@@ -35,6 +37,39 @@ export async function getTrades(
 	throw new Error('Unable to fettch trades');
 }
 
-function isTradeRecordClient(test: any): test is TradeRecordClient {
-	return test._id !== undefined;
+export async function getTradesHistory() {
+	const collection = await getTradeCollection();
+	const trades = await collection.find().sort({ soldTimestamp: -1 }).toArray();
+
+	const clientTrades = trades.map((t: any) => ({
+		...t,
+		_id: t._id.toString()
+	}));
+	if (!clientTrades.every(isTradeRecordClient)) {
+		throw new Error('Unable to fettch trades');
+	}
+
+	// group by day
+	const groupedTrades: TradesHistoryResponse = {};
+	clientTrades.forEach((t) => {
+		const date = format(t.soldTimestamp, 'yyyy-MM-dd');
+		if (!groupedTrades[date]) {
+			groupedTrades[date] = {
+				pnl: 0,
+				trades: []
+			};
+		}
+		groupedTrades[date].trades.push(t);
+		groupedTrades[date].pnl += t.pnl;
+	});
+
+	return groupedTrades;
+}
+
+function isTradeRecordClient(test: unknown): test is TradeRecordClient {
+	return (
+		typeof test !== null &&
+		typeof test !== undefined &&
+		(test as TradeRecordClient)._id !== undefined
+	);
 }
