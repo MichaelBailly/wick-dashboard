@@ -1,10 +1,7 @@
 <script lang="ts">
 	import type { TradesHistoryResponse } from '$lib/types/TradesHistoryResponse';
 	import Pnl from '$lib/widgets/Pnl.svelte';
-	import Accordion from '@smui-extra/accordion/src/Accordion.svelte';
-	import Header from '@smui-extra/accordion/src/Header.svelte';
-	import Panel from '@smui-extra/accordion/src/Panel.svelte';
-	import { Content } from '@smui/drawer';
+	import Accordion, { Content, Header, Panel } from '@smui-extra/accordion';
 	import FormField from '@smui/form-field';
 	import IconButton, { Icon } from '@smui/icon-button';
 	import Paper from '@smui/paper';
@@ -33,14 +30,17 @@
 		<span slot="label">Only show positive PnL</span>
 	</FormField>
 
-	<Accordion>
+	<Accordion multiple>
 		{#each history as type}
-			<Panel bind:open={panelOpen}>
+			<Panel bind:open={panelOpened[type.type]}>
 				<Header>
 					<span> <Pnl pnl={type.pnl} />$ - {type.tradeCount} trades</span>
-					<span slot="description" class="primary">{type.type}</span>
+					<span slot="description" class="primary"
+						>{type.type}
+						<a href="/history/type/{type.watcher.type}/{type.watcher.config}">more...</a></span
+					>
 
-					<IconButton slot="icon" toggle pressed={panelOpen}>
+					<IconButton slot="icon" toggle pressed={panelOpened[type.type]}>
 						<Icon class="material-icons" on>expand_less</Icon>
 						<Icon class="material-icons">expand_more</Icon>
 					</IconButton>

@@ -2,8 +2,12 @@ import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
 import type { TradesHistoryResponse } from '$lib/types/TradesHistoryResponse';
 
 export type PerTradeTypeResponseInternal = {
+	// trade type
 	[key: string]: {
-		// trade type
+		watcher: {
+			type: string;
+			config: string;
+		};
 		pnl: number;
 		tradeCount: number;
 		history: {
@@ -16,6 +20,10 @@ export type PerTradeTypeResponseInternal = {
 
 export type PerTradeTypeResponse = {
 	type: string;
+	watcher: {
+		type: string;
+		config: string;
+	};
 	pnl: number;
 	tradeCount: number;
 	history: {
@@ -35,6 +43,7 @@ export function perTradeType(trades: TradesHistoryResponse): PerTradeTypeRespons
 			const tradeType = `${trade.watcher.type} ${trade.watcher.config}`;
 			if (!perTradeType[tradeType]) {
 				perTradeType[tradeType] = {
+					watcher: trade.watcher,
 					pnl: 0,
 					tradeCount: 0,
 					history: []
@@ -61,6 +70,7 @@ export function perTradeType(trades: TradesHistoryResponse): PerTradeTypeRespons
 	Object.keys(perTradeType).forEach((key) => {
 		result.push({
 			type: key,
+			watcher: perTradeType[key].watcher,
 			pnl: perTradeType[key].pnl - perTradeType[key].tradeCount * FEE_PER_TRADE,
 			tradeCount: perTradeType[key].tradeCount,
 			history: perTradeType[key].history
