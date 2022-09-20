@@ -17,13 +17,13 @@
 		TimeScale,
 		Tooltip
 	} from 'chart.js';
+
 	import 'chartjs-adapter-date-fns';
 	import { formatDistance } from 'date-fns';
 	// import date-fns locale:
 	import { enUS } from 'date-fns/locale';
 	import { onMount } from 'svelte';
 	import { getTradesGraphData } from './helpers';
-
 	let canvas: HTMLCanvasElement;
 	Chart.register(
 		LineController,

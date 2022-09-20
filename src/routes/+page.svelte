@@ -55,6 +55,8 @@
 				});
 			}
 		}
+		// sort by pnl
+		todaysPnlPerWatcher.sort((a, b) => b.pnl - a.pnl);
 	}
 
 	function toHuman(date: Date | number) {
@@ -78,7 +80,7 @@
 					<div>
 						{w.type}
 						{w.config}: <Pnl pnl={w.pnl} />
-						({w.count} trades)
+						({w.count} trades) <a href="/history/{w.type}/{w.config}">more...</a>
 					</div>
 				{/each}
 			</div>
