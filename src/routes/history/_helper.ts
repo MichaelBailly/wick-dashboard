@@ -31,11 +31,11 @@ export type PerTradeTypeResponse = {
 		pnl: number;
 		trades: TradeRecordClient[];
 	}[];
-}[];
+};
 
 const FEE_PER_TRADE = 0.15;
 
-export function perTradeType(trades: TradesHistoryResponse): PerTradeTypeResponse {
+export function perTradeType(trades: TradesHistoryResponse): PerTradeTypeResponse[] {
 	const perTradeType: PerTradeTypeResponseInternal = {};
 	for (const date in trades) {
 		const tradesForDate = trades[date];
@@ -65,7 +65,7 @@ export function perTradeType(trades: TradesHistoryResponse): PerTradeTypeRespons
 		}
 	}
 
-	const result: PerTradeTypeResponse = [];
+	const result: PerTradeTypeResponse[] = [];
 
 	Object.keys(perTradeType).forEach((key) => {
 		result.push({

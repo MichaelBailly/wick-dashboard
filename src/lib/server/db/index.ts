@@ -6,7 +6,7 @@ import {
 	MONGO_VOLUME_COLLECTION
 } from '../../constants.server';
 
-let client: MongoClient | null = null;
+let clients: Map<string, MongoClient> = new Map();
 
 export async function getClient() {
 	return getClientInternal(MONGO_DB);
@@ -22,13 +22,20 @@ export async function getTradeCollection() {
 }
 
 export async function getVolumeCollection() {
-	const client = await getClient();
+	const client = await getReferenceClient();
 	return client.db().collection(MONGO_VOLUME_COLLECTION);
 }
 
 async function getClientInternal(db: string) {
-	if (!client) {
-		client = await new MongoClient(db).connect();
+	if (clients.has(db)) {
+		const clientOk = clients.get(db);
+		if (clientOk) {
+			return clientOk;
+		}
 	}
+
+	const client = await new MongoClient(db).connect();
+
+	clients.set(db, client);
 	return client;
 }

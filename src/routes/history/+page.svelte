@@ -6,6 +6,7 @@
 	import IconButton, { Icon } from '@smui/icon-button';
 	import Paper from '@smui/paper';
 	import Switch from '@smui/switch';
+	import VolumeSuccessRate from './VolumeSuccessRate.svelte';
 	import { perTradeType, type PerTradeTypeResponse } from './_helper';
 
 	/** @type {import('./$types').PageData} */
@@ -13,7 +14,7 @@
 
 	let panelOpened: Record<string, boolean> = {};
 
-	let history: PerTradeTypeResponse = [];
+	let history: PerTradeTypeResponse[] = [];
 	let onlyPositivePnl = false;
 	$: {
 		history = perTradeType(data.trades);
@@ -47,11 +48,7 @@
 					</IconButton>
 				</Header>
 				<Content>
-					{#each type.history as day}
-						<span>
-							{day.date}: <Pnl pnl={day.pnl} /> - {day.trades.length} trades
-						</span>
-					{/each}
+					<VolumeSuccessRate {type} />
 				</Content>
 			</Panel>
 		{/each}

@@ -4,7 +4,6 @@ import type { TradeRecordClient } from 'src/lib/types/TradeRecordClient';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load() {
-	console.log('load fn');
 	const trades = await getTrades();
 
 	if (trades) {

@@ -1,0 +1,49 @@
+<script lang="ts">
+	import { getVolumeFamily } from '$lib/volumeReference';
+	import Pnl from '$lib/widgets/Pnl.svelte';
+	import type { PerTradeTypeResponse } from './_helper';
+
+	export let type: PerTradeTypeResponse;
+
+	let volumeAnalyses: Map<string, any>;
+	let pnlPerVolumeFamily: any[] = [];
+	$: {
+		volumeAnalyses = new Map();
+		type.history.forEach((day) => {
+			day.trades.forEach((trade) => {
+				const family = getVolumeFamily(trade.pair);
+				if (!family) {
+					return;
+				}
+
+				let analyses = volumeAnalyses.get(family);
+				if (!analyses) {
+					analyses = {
+						count: 0,
+						pnl: 0
+					};
+					volumeAnalyses.set(family, analyses);
+				}
+				analyses.count++;
+				analyses.pnl += trade.pnl;
+			});
+		});
+
+		pnlPerVolumeFamily = Array.from(volumeAnalyses.entries())
+			.map(([family, analyses]) => {
+				return {
+					family,
+					pnl: analyses.pnl,
+					count: analyses.count,
+					avgPnl: analyses.pnl / analyses.count
+				};
+			})
+			.sort((a, b) => b.avgPnl - a.avgPnl);
+	}
+</script>
+
+{#each pnlPerVolumeFamily as volumeFamily}
+	<div>
+		{volumeFamily.family}: <Pnl pnl={volumeFamily.pnl} /> - {volumeFamily.count} trades
+	</div>
+{/each}
