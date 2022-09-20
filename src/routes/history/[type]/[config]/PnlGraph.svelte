@@ -33,14 +33,33 @@
 		Legend
 	);
 
-	const { pnl, cumulatedPnl, trades: sortedTrades } = getTradesGraphData(trades);
+	let chart: Chart;
+	let { pnl, cumulatedPnl, trades: sortedTrades } = getTradesGraphData(trades);
+
+	$: {
+		if (chart) {
+			const out = getTradesGraphData(trades);
+			pnl = out.pnl;
+			cumulatedPnl = out.cumulatedPnl;
+			sortedTrades = out.trades;
+
+			// @ts-ignore
+			chart.data.datasets[0].data = pnl;
+			// @ts-ignore
+			chart.data.datasets[1].data = cumulatedPnl;
+
+			chart.update();
+		}
+	}
 
 	onMount(() => {
 		const ctx = canvas.getContext('2d');
 		if (!ctx) {
 			return;
 		}
-		var myChart = new Chart(ctx, {
+
+		// @ts-ignore
+		chart = new Chart(ctx, {
 			type: 'line',
 			data: {
 				datasets: [
@@ -66,6 +85,7 @@
 				maintainAspectRatio: false,
 				scales: {
 					x: {
+						// @ts-ignore
 						type: 'time',
 						distribution: 'linear',
 						title: {
