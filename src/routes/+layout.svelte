@@ -1,6 +1,12 @@
 <script lang="ts">
+	import { loadReference } from '$lib/volumeReference';
 	import Drawer, { AppContent, Content } from '@smui/drawer';
 	import List, { Item, Text } from '@smui/list';
+
+	/** @type {import('./$types').LayoutData} */
+	export let data;
+
+	loadReference(data.volumeReference);
 </script>
 
 <div class="page-container">

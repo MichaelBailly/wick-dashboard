@@ -12,12 +12,13 @@
 	export let data: { trades: TradesHistoryResponse };
 
 	let panelOpened: Record<string, boolean> = {};
-	let panelOpen = false;
 
 	let history: PerTradeTypeResponse = [];
 	let onlyPositivePnl = false;
 	$: {
 		history = perTradeType(data.trades);
+		// sort hitory by pnl, highest first
+		history = history.sort((a, b) => b.pnl - a.pnl);
 		if (onlyPositivePnl) {
 			history = history.filter((h) => h.pnl > 0);
 		}
