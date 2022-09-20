@@ -18,6 +18,8 @@ export enum SORT_FIELD {
 export type TradeHistoryOpts = {
 	type?: string;
 	config?: string;
+	start?: Date;
+	end?: Date;
 };
 
 export async function getTrades(
@@ -45,6 +47,7 @@ export async function getTrades(
 type TradeHistoryMongoQuery = {
 	'watcher.type'?: string;
 	'watcher.config'?: string;
+	$and?: { boughtTimestamp: { $gte?: Date; $lt?: Date } }[];
 };
 
 export async function getTradesHistory(opts: TradeHistoryOpts = {}) {
@@ -54,6 +57,15 @@ export async function getTradesHistory(opts: TradeHistoryOpts = {}) {
 	}
 	if (opts.config && typeof opts.config === 'string') {
 		query['watcher.config'] = opts.config;
+	}
+	if (opts.start && opts.start instanceof Date) {
+		query.$and = [{ boughtTimestamp: { $gte: opts.start } }];
+	}
+	if (opts.end && opts.end instanceof Date) {
+		if (!query.$and) {
+			query.$and = [];
+		}
+		query.$and.push({ boughtTimestamp: { $lt: opts.end } });
 	}
 
 	const collection = await getTradeCollection();
