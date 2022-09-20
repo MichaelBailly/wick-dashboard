@@ -33,6 +33,10 @@
 		Legend
 	);
 
+	Chart.defaults.backgroundColor = 'rgba(0,0,0,1)';
+	Chart.defaults.borderColor = 'rgba(0,0,0,1)';
+	Chart.defaults.color = 'rgba(200,200,200,0.9)';
+
 	let chart: Chart;
 	let { pnl, cumulatedPnl, trades: sortedTrades } = getTradesGraphData(trades);
 
@@ -66,17 +70,21 @@
 					{
 						label: 'Pnl',
 						data: pnl,
-						backgroundColor: '#c49000',
-						borderColor: 'rgba(0,0,0, 0.4)',
-						borderWidth: 1,
+						backgroundColor: 'rgb(196, 144, 0)',
+						borderColor: 'rgba(196, 144, 0, 0.5)',
+						borderWidth: 2,
+						cubicInterpolationMode: 'monotone',
+						tension: 0.4,
 						yAxisID: 'y'
 					},
 					{
 						label: 'Cumulated Pnl',
 						data: cumulatedPnl,
-						backgroundColor: '#00838f',
-						borderColor: 'rgba(0,0,0, 0.4)',
-						borderWidth: 1,
+						backgroundColor: 'rgb(0, 131, 143)',
+						borderColor: 'rgba(0, 131, 143, 0.5)',
+						borderWidth: 2,
+						cubicInterpolationMode: 'monotone',
+						tension: 0.4,
 						yAxisID: 'y2'
 					}
 				]
@@ -92,6 +100,10 @@
 							display: true,
 							text: 'Date'
 						},
+						grid: {
+							// drawBorder: false,
+							color: 'rgba(30,30,30, 0.6)'
+						},
 						adapters: {
 							date: {
 								locale: enUS
@@ -100,7 +112,17 @@
 					},
 					y: {
 						ticks: {
-							color: '#c49000'
+							color: 'rgb(196, 144, 0)'
+						},
+						grid: {
+							drawBorder: false,
+							color: function (context) {
+								if (context.tick.value !== 0) {
+									return 'rgba(30,30,30, 0.6)';
+								}
+
+								return '#000000';
+							}
 						}
 					},
 					y2: {
@@ -108,10 +130,11 @@
 						display: true,
 						position: 'right',
 						ticks: {
-							color: '#00838f'
+							color: 'rgb(0, 131, 143)'
 						},
 						grid: {
-							drawOnChartArea: false
+							drawOnChartArea: false,
+							drawBorder: false
 						}
 					}
 				},
@@ -139,7 +162,7 @@
 					legend: {
 						display: true,
 						labels: {
-							color: '#333'
+							color: 'rgba(200,200,200,0.9)'
 						}
 					}
 				}
@@ -154,7 +177,7 @@
 
 <style>
 	.canvas-container {
-		background-color: white;
+		background-color: rgb(51, 51, 64);
 		padding: 1rem;
 		width: 1024px;
 		height: 300px;
