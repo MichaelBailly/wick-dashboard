@@ -4,6 +4,8 @@
 	export let trades: TradeRecordClient[];
 
 	import {
+		BarController,
+		BarElement,
 		CategoryScale,
 		Chart,
 		Legend,
@@ -11,6 +13,7 @@
 		LineController,
 		LineElement,
 		PointElement,
+		ScatterController,
 		TimeScale,
 		Tooltip
 	} from 'chart.js';
@@ -30,7 +33,10 @@
 		LineElement,
 		TimeScale,
 		Tooltip,
-		Legend
+		Legend,
+		ScatterController,
+		BarController,
+		BarElement
 	);
 
 	Chart.defaults.backgroundColor = 'rgba(0,0,0,1)';
@@ -68,16 +74,17 @@
 			data: {
 				datasets: [
 					{
+						type: 'bar',
 						label: 'Pnl',
 						data: pnl,
 						backgroundColor: 'rgb(196, 144, 0)',
 						borderColor: 'rgba(196, 144, 0, 0.5)',
 						borderWidth: 2,
-						cubicInterpolationMode: 'monotone',
-						tension: 0.4,
-						yAxisID: 'y'
+						yAxisID: 'y2',
+						order: 2
 					},
 					{
+						type: 'line',
 						label: 'Cumulated Pnl',
 						data: cumulatedPnl,
 						backgroundColor: 'rgb(0, 131, 143)',
@@ -85,7 +92,8 @@
 						borderWidth: 2,
 						cubicInterpolationMode: 'monotone',
 						tension: 0.4,
-						yAxisID: 'y2'
+						yAxisID: 'y',
+						order: 1
 					}
 				]
 			},
@@ -110,7 +118,7 @@
 							}
 						}
 					},
-					y: {
+					y2: {
 						ticks: {
 							color: 'rgb(196, 144, 0)'
 						},
@@ -125,7 +133,7 @@
 							}
 						}
 					},
-					y2: {
+					y: {
 						type: 'linear',
 						display: true,
 						position: 'right',

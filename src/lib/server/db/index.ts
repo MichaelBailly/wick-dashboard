@@ -6,7 +6,7 @@ import {
 	MONGO_VOLUME_COLLECTION
 } from '../../constants.server';
 
-let clients: Map<string, MongoClient> = new Map();
+const clients: Map<string, MongoClient> = new Map();
 
 export async function getClient() {
 	return getClientInternal(MONGO_DB);
