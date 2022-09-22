@@ -66,16 +66,22 @@
 
 <Paper>
 	<Content>
+		<h1>
+			{toHuman(date)} - PNL
+			<small>
+				<Button href="/?date={yesterday}">{yesterday}</Button>
+				<Button href="/?date={tomorrow}">{tomorrow}</Button>
+			</small>
+		</h1>
 		<div class="summary-container">
 			<div class="summary-total-pnl">
 				PNL<br />
 				<div><Pnl pnl={todaysPnl - todaysFees} />$</div>
 				<div>
-					({Math.trunc(todaysPnl * 100) / 100}$, {todaysFees}$ fees)
+					(${Math.trunc(todaysPnl * 100) / 100}, ${Math.trunc(todaysFees * 100) / 100} fees)
 				</div>
 			</div>
 			<div class="summary-info">
-				<div>{toHuman(date)} - PNL</div>
 				{#each todaysPnlPerWatcher as w}
 					<div>
 						{w.type}
@@ -83,10 +89,6 @@
 						({w.count} trades) <a href="/history/{w.type}/{w.config}">more...</a>
 					</div>
 				{/each}
-			</div>
-			<div class="summary-controls">
-				<Button href="/?date={yesterday}">{yesterday}</Button>
-				<Button href="/?date={tomorrow}">{tomorrow}</Button>
 			</div>
 		</div>
 	</Content>
