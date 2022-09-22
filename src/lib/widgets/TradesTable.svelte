@@ -49,7 +49,7 @@
 					{t.pair}
 				</Cell>
 				<Cell>
-					{format(t.boughtTimestamp, 'yy MMM EEE i HH:mm')}
+					{format(t.boughtTimestamp, 'yy, EEE MMM d HH:mm')}
 				</Cell>
 				<Cell>
 					{formatDistance(t.soldTimestamp, t.boughtTimestamp)}

@@ -4,12 +4,12 @@
 	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
 	import type { TradesHistoryResponse } from '$lib/types/TradesHistoryResponse';
 	import Pnl from '$lib/widgets/Pnl.svelte';
+	import TradesTable from '$lib/widgets/TradesTable.svelte';
 	import Button from '@smui/button';
 	import Tab, { Label } from '@smui/tab';
 	import TabBar from '@smui/tab-bar';
 	import { add, format, startOfMonth } from 'date-fns';
 	import PnlGraph from './PnlGraph.svelte';
-	import TradesDataTable from './TradesDataTable.svelte';
 
 	/** @type {import('./$types').PageData} */
 	export let data: { trades: TradesHistoryResponse };
@@ -36,10 +36,9 @@
 			period = 'last30days';
 		}
 
-		trades = Object.values(data.trades).reduce(
-			(acc, { trades }) => [...acc, ...trades],
-			[] as TradeRecordClient[]
-		);
+		trades = Object.values(data.trades)
+			.reduce((acc, { trades }) => [...acc, ...trades], [] as TradeRecordClient[])
+			.sort((a, b) => a.boughtTimestamp.getTime() - b.boughtTimestamp.getTime());
 
 		pnl = trades.reduce((acc, { pnl }) => acc + pnl, 0);
 		pnl -= FEE_PER_TRADE * trades.length;
@@ -122,7 +121,7 @@
 	{#if activeTab === 'Graph'}
 		<PnlGraph {trades} />
 	{:else if activeTab === 'Data'}
-		<TradesDataTable {trades} />
+		<TradesTable {trades} />
 	{/if}
 </div>
 

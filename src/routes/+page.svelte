@@ -8,10 +8,10 @@
 	import Button from '@smui/button';
 	import IconButton, { Icon } from '@smui/icon-button';
 	import Paper, { Content } from '@smui/paper';
-	import { add, format, isSameDay } from 'date-fns';
+	import { add, format } from 'date-fns';
 
 	/** @type {import('./$types').PageData} */
-	export let data;
+	export let data: { trades: TradeRecordClient[] };
 	let tradeAccordionOpen: boolean = false;
 
 	let date: Date;
@@ -36,7 +36,7 @@
 		yesterday = format(add(date, { days: -1 }), 'yyyy-MM-dd');
 		tomorrow = format(add(date, { days: 1 }), 'yyyy-MM-dd');
 
-		todaysTrades = data.trades.filter((t: TradeRecordClient) => isSameDay(t.soldTimestamp, date));
+		todaysTrades = data.trades;
 		todaysPnl = todaysTrades.reduce((acc: number, t: TradeRecordClient) => acc + t.pnl, 0);
 		todaysFees = todaysTrades.length * FEE_PER_TRADE;
 		for (const t of todaysTrades) {
@@ -60,7 +60,7 @@
 	}
 
 	function toHuman(date: Date | number) {
-		return format(date, 'MMM d, yyyy');
+		return format(date, 'MMM dd, yyyy');
 	}
 </script>
 

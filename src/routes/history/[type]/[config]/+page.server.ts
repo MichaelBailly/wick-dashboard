@@ -1,3 +1,4 @@
+import { getAtMidnightUTC, getTodayAtMidnightUTC } from '$lib/dates';
 import { getTradesHistory, type TradeHistoryOpts } from '$lib/server/db/trades';
 import type { HistoryTypeLoadArgs } from '$lib/types/HistoryTypeLoadArgs';
 import { add } from 'date-fns';
@@ -9,24 +10,20 @@ export async function load({ url, params }: HistoryTypeLoadArgs) {
 	let end: Date | undefined;
 
 	if (period === 'today') {
-		start = new Date();
-		start.setUTCHours(0, 0, 0, 0);
+		start = getTodayAtMidnightUTC();
 	} else if (period === 'yesterday') {
-		end = new Date();
-		end.setUTCHours(0, 0, 0, 0);
+		end = getTodayAtMidnightUTC();
 		start = add(end, { days: -1 });
 	} else if (period === 'last7days') {
-		start = new Date();
-		start.setUTCHours(0, 0, 0, 0);
+		start = getTodayAtMidnightUTC();
 		start = add(start, { days: -7 });
 	} else if (period !== null && /\d\d\d\d-\d\d/.test(period)) {
 		const [year, month] = period.split('-').map((v) => parseInt(v, 10));
-		start = new Date(new Date(Number(year), Number(month) - 1, 1).setUTCHours(0, 0, 0, 0));
+		start = getAtMidnightUTC(year, month, 1);
 		end = add(start, { months: 1 });
 	} else {
 		// last30days
-		start = new Date();
-		start.setUTCHours(0, 0, 0, 0);
+		start = getTodayAtMidnightUTC();
 		start = add(start, { days: -30 });
 	}
 
