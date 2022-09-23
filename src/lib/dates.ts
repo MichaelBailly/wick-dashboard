@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 export function getAtMidnightUTC(year: number, month: number, day: number): Date {
 	const d = new Date();
 	d.setUTCHours(0, 0, 0, 0);
@@ -15,4 +17,19 @@ export function getTodayAtMidnightUTC(): Date {
 
 export function getDateAtMidnightUTC(date: Date): Date {
 	return getAtMidnightUTC(date.getFullYear(), date.getMonth() + 1, date.getDate());
+}
+
+export function parseMonthStringOrNow(period?: string | null): [number, number] {
+	if (!period) {
+		period = format(new Date(), 'yyyy-MM');
+	}
+	let [year, month] = period.split('-').map((d) => parseInt(d, 10));
+	if (isNaN(year)) {
+		year = new Date().getFullYear();
+	}
+	if (isNaN(month)) {
+		month = new Date().getMonth() + 1;
+	}
+
+	return [year, month];
 }

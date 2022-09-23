@@ -1,5 +1,5 @@
 import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
-import type { TradesHistoryResponse } from '$lib/types/TradesHistoryResponse';
+import { format } from 'date-fns';
 
 export type PerTradeTypeResponseInternal = {
 	// trade type
@@ -35,34 +35,32 @@ export type PerTradeTypeResponse = {
 
 const FEE_PER_TRADE = 0.15;
 
-export function perTradeType(trades: TradesHistoryResponse): PerTradeTypeResponse[] {
+export function perTradeType(trades: TradeRecordClient[]): PerTradeTypeResponse[] {
 	const perTradeType: PerTradeTypeResponseInternal = {};
-	for (const date in trades) {
-		const tradesForDate = trades[date];
-		for (const trade of tradesForDate.trades) {
-			const tradeType = `${trade.watcher.type} ${trade.watcher.config}`;
-			if (!perTradeType[tradeType]) {
-				perTradeType[tradeType] = {
-					watcher: trade.watcher,
-					pnl: 0,
-					tradeCount: 0,
-					history: []
-				};
-			}
-			perTradeType[tradeType].pnl += trade.pnl;
-			perTradeType[tradeType].tradeCount++;
-			let dayData = perTradeType[tradeType].history.find((d) => d.date === date);
-			if (!dayData) {
-				dayData = {
-					date,
-					pnl: 0,
-					trades: []
-				};
-				perTradeType[tradeType].history.push(dayData);
-			}
-			dayData.pnl += trade.pnl;
-			dayData.trades.push(trade);
+	for (const trade of trades) {
+		const date = format(trade.boughtTimestamp, 'yyyy-MM-dd');
+		const tradeType = `${trade.watcher.type} ${trade.watcher.config}`;
+		if (!perTradeType[tradeType]) {
+			perTradeType[tradeType] = {
+				watcher: trade.watcher,
+				pnl: 0,
+				tradeCount: 0,
+				history: []
+			};
 		}
+		perTradeType[tradeType].pnl += trade.pnl;
+		perTradeType[tradeType].tradeCount++;
+		let dayData = perTradeType[tradeType].history.find((d) => d.date === date);
+		if (!dayData) {
+			dayData = {
+				date,
+				pnl: 0,
+				trades: []
+			};
+			perTradeType[tradeType].history.push(dayData);
+		}
+		dayData.pnl += trade.pnl;
+		dayData.trades.push(trade);
 	}
 
 	const result: PerTradeTypeResponse[] = [];

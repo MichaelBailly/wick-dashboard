@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { FEE_PER_TRADE } from '$lib/constants.client';
 	import { getVolumeFamily } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import type { PerTradeTypeResponse } from './_helper';
@@ -25,7 +26,7 @@
 					volumeAnalyses.set(family, analyses);
 				}
 				analyses.count++;
-				analyses.pnl += trade.pnl;
+				analyses.pnl += trade.pnl - FEE_PER_TRADE;
 			});
 		});
 
@@ -35,7 +36,7 @@
 					family,
 					pnl: analyses.pnl,
 					count: analyses.count,
-					avgPnl: analyses.pnl / analyses.count
+					avgPnl: analyses.count === 0 ? 0 : analyses.pnl / analyses.count
 				};
 			})
 			.sort((a, b) => b.avgPnl - a.avgPnl);
@@ -44,6 +45,8 @@
 
 {#each pnlPerVolumeFamily as volumeFamily}
 	<div>
-		{volumeFamily.family}: <Pnl pnl={volumeFamily.pnl} /> - {volumeFamily.count} trades
+		{volumeFamily.family}: Avg $<Pnl pnl={volumeFamily.avgPnl} /> ($<Pnl pnl={volumeFamily.pnl} /> in
+		{volumeFamily.count}
+		trades)
 	</div>
 {/each}

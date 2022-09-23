@@ -22,17 +22,37 @@ export type TradeHistoryOpts = {
 	end?: Date;
 };
 
-export async function getTrades(
-	sortField: SORT_FIELD = SORT_FIELD.SOLD,
-	sort: SORT = SORT.DESC
-): Promise<TradeRecordClient[] | null> {
+export type GetTradesOpts = {
+	start?: Date;
+	end?: Date;
+	sort?: SORT;
+	sortField?: SORT_FIELD;
+};
+
+type GetTradesMongoQuery = {
+	$and?: { boughtTimestamp: { $gte?: Date; $lt?: Date } }[];
+};
+
+export async function getTrades(opts: GetTradesOpts = {}): Promise<TradeRecordClient[] | null> {
+	const sort = opts?.sort || SORT.DESC;
+	const sortField = opts?.sortField || SORT_FIELD.BOUGHT;
+	const query: GetTradesMongoQuery = {};
+	if (opts.start && opts.start instanceof Date) {
+		query.$and = [{ boughtTimestamp: { $gte: opts.start } }];
+	}
+	if (opts.end && opts.end instanceof Date) {
+		if (!query.$and) {
+			query.$and = [];
+		}
+		query.$and.push({ boughtTimestamp: { $lt: opts.end } });
+	}
 	const collection = await getTradeCollection();
 	const trades = await collection
-		.find()
+		.find(query)
 		.sort({ [sortField]: sort })
 		.toArray();
 
-	const clientTrades = trades.map((t: any) => ({
+	const clientTrades = trades.map((t) => ({
 		...t,
 		_id: t._id.toString()
 	}));
@@ -71,7 +91,7 @@ export async function getTradesHistory(opts: TradeHistoryOpts = {}) {
 	const collection = await getTradeCollection();
 	const trades = await collection.find(query).sort({ soldTimestamp: -1 }).toArray();
 
-	const clientTrades = trades.map((t: any) => ({
+	const clientTrades = trades.map((t) => ({
 		...t,
 		_id: t._id.toString()
 	}));
