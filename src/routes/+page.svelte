@@ -67,7 +67,7 @@
 <Paper>
 	<Content>
 		<h1>
-			{toHuman(date)} - PNL
+			{toHuman(date)}
 			<small>
 				<Button href="/?date={yesterday}">{yesterday}</Button>
 				<Button href="/?date={tomorrow}">{tomorrow}</Button>
