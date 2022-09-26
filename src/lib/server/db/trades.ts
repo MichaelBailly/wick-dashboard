@@ -23,6 +23,8 @@ export type TradeHistoryOpts = {
 };
 
 export type GetTradesOpts = {
+	type?: string;
+	config?: string;
 	start?: Date;
 	end?: Date;
 	sort?: SORT;
@@ -30,6 +32,8 @@ export type GetTradesOpts = {
 };
 
 type GetTradesMongoQuery = {
+	'watcher.type'?: string;
+	'watcher.config'?: string;
 	$and?: { boughtTimestamp: { $gte?: Date; $lt?: Date } }[];
 };
 
@@ -37,6 +41,12 @@ export async function getTrades(opts: GetTradesOpts = {}): Promise<TradeRecordCl
 	const sort = opts?.sort || SORT.DESC;
 	const sortField = opts?.sortField || SORT_FIELD.BOUGHT;
 	const query: GetTradesMongoQuery = {};
+	if (opts.type && typeof opts.type === 'string') {
+		query['watcher.type'] = opts.type;
+	}
+	if (opts.config && typeof opts.config === 'string') {
+		query['watcher.config'] = opts.config;
+	}
 	if (opts.start && opts.start instanceof Date) {
 		query.$and = [{ boughtTimestamp: { $gte: opts.start } }];
 	}

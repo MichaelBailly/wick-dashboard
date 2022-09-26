@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { FEE_PER_TRADE } from '$lib/constants.client';
 	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
-	import type { TradesHistoryResponse } from '$lib/types/TradesHistoryResponse';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import TradesTable from '$lib/widgets/TradesTable.svelte';
 	import Button from '@smui/button';
@@ -12,15 +11,15 @@
 	import PnlGraph from './PnlGraph.svelte';
 
 	/** @type {import('./$types').PageData} */
-	export let data: { trades: TradesHistoryResponse };
+	export let data: { trades: TradeRecordClient[] };
 
 	const today = new Date();
 	const thisMonth = format(startOfMonth(today), 'yyyy-MM');
 	const lastMonth = format(startOfMonth(add(today, { months: -1 })), 'yyyy-MM');
 
-	let trades: TradeRecordClient[] = [];
 	let period: string = '';
 	let pnl = 0;
+	let activeTab = 'Graph';
 
 	$: {
 		const urlPeriod = $page.url.searchParams.get('period');
@@ -36,21 +35,15 @@
 			period = 'last30days';
 		}
 
-		trades = Object.values(data.trades)
-			.reduce((acc, { trades }) => [...acc, ...trades], [] as TradeRecordClient[])
-			.sort((a, b) => a.boughtTimestamp.getTime() - b.boughtTimestamp.getTime());
-
-		pnl = trades.reduce((acc, { pnl }) => acc + pnl, 0);
-		pnl -= FEE_PER_TRADE * trades.length;
+		pnl = data.trades.reduce((acc, { pnl }) => acc + pnl, 0);
+		pnl -= FEE_PER_TRADE * data.trades.length;
 	}
-
-	let activeTab = 'Graph';
 </script>
 
 <h2>{$page.params.type} {$page.params.config}</h2>
 
 <h3>
-	PnL: $<Pnl {pnl} /> (including fees) - {trades.length} trades
+	PnL: $<Pnl {pnl} /> (including fees) - {data.trades.length} trades
 </h3>
 
 <p>
@@ -119,9 +112,9 @@
 </TabBar>
 <div class="tab-content">
 	{#if activeTab === 'Graph'}
-		<PnlGraph {trades} />
+		<PnlGraph trades={data.trades} />
 	{:else if activeTab === 'Data'}
-		<TradesTable {trades} />
+		<TradesTable trades={data.trades} />
 	{/if}
 </div>
 

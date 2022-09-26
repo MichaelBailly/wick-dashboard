@@ -1,5 +1,5 @@
 import { getAtMidnightUTC, getTodayAtMidnightUTC } from '$lib/dates';
-import { getTradesHistory, type TradeHistoryOpts } from '$lib/server/db/trades';
+import { getTrades, type TradeHistoryOpts } from '$lib/server/db/trades';
 import type { HistoryTypeLoadArgs } from '$lib/types/HistoryTypeLoadArgs';
 import { add } from 'date-fns';
 
@@ -29,7 +29,7 @@ export async function load({ url, params }: HistoryTypeLoadArgs) {
 
 	const opts: TradeHistoryOpts = { type: params.type, config: params.config, start, end };
 
-	const trades = await getTradesHistory(opts);
+	const trades = await getTrades(opts);
 
 	return {
 		trades
