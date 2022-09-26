@@ -129,7 +129,7 @@
 									return 'rgba(30,30,30, 0.6)';
 								}
 
-								return '#000000';
+								return 'rgba(196, 144, 0, 0.35)';
 							}
 						}
 					},
@@ -141,7 +141,13 @@
 							color: 'rgb(0, 131, 143)'
 						},
 						grid: {
-							drawOnChartArea: false,
+							color: function (context) {
+								if (context.tick.value !== 0) {
+									return 'rgba(30,30,30, 0)';
+								}
+
+								return 'rgba(0, 131, 143, 0.35)';
+							},
 							drawBorder: false
 						}
 					}
