@@ -21,6 +21,7 @@
 		"@smui/button": "^6.1.0",
 		"@smui/data-table": "^6.1.0",
 		"@smui/drawer": "^6.1.0",
+		"@smui/form-field": "^6.1.0",
 		"@smui/list": "^6.1.0",
 		"@smui/paper": "^6.1.0",
 		"@smui/select": "^6.1.0",
@@ -48,7 +49,6 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@smui/form-field": "^6.1.0",
 		"chart.js": "^3.9.1",
 		"chartjs-adapter-date-fns": "^2.0.0",
 		"date-fns": "^2.29.3",

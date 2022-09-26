@@ -26,6 +26,7 @@ export type PerTradeTypeResponse = {
 	};
 	pnl: number;
 	tradeCount: number;
+	pnlPerTrade: number;
 	history: {
 		date: string;
 		pnl: number;
@@ -66,11 +67,13 @@ export function perTradeType(trades: TradeRecordClient[]): PerTradeTypeResponse[
 	const result: PerTradeTypeResponse[] = [];
 
 	Object.keys(perTradeType).forEach((key) => {
+		const pnl = perTradeType[key].pnl - perTradeType[key].tradeCount * FEE_PER_TRADE;
 		result.push({
 			type: key,
 			watcher: perTradeType[key].watcher,
-			pnl: perTradeType[key].pnl - perTradeType[key].tradeCount * FEE_PER_TRADE,
+			pnl: pnl,
 			tradeCount: perTradeType[key].tradeCount,
+			pnlPerTrade: pnl / perTradeType[key].tradeCount,
 			history: perTradeType[key].history
 		});
 	});

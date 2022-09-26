@@ -21,6 +21,7 @@
 	let onlyPositivePnl = false;
 
 	let period: string = '';
+	let pnlPerTrade = true;
 
 	let prevPeriod: { human: string; machine: string } = { human: '', machine: '' };
 	let nextPeriod: { human: string; machine: string } = { human: '', machine: '' };
@@ -44,10 +45,18 @@
 		// results formatting
 		//
 		history = perTradeType(data.trades);
-		// sort hitory by pnl, highest first
-		history = history.sort((a, b) => b.pnl - a.pnl);
-		if (onlyPositivePnl) {
-			history = history.filter((h) => h.pnl > 0);
+
+		if (pnlPerTrade) {
+			history = history.sort((a, b) => b.pnlPerTrade - a.pnlPerTrade);
+			if (onlyPositivePnl) {
+				history = history.filter((h) => h.pnlPerTrade > 0);
+			}
+		} else {
+			// sort hitory by pnl, highest first
+			history = history.sort((a, b) => b.pnl - a.pnl);
+			if (onlyPositivePnl) {
+				history = history.filter((h) => h.pnl > 0);
+			}
 		}
 	}
 </script>
@@ -63,6 +72,10 @@
 		</div>
 	</div>
 	<FormField align="end">
+		<Switch bind:checked={pnlPerTrade} />
+		<span slot="label">PnL per Trade</span>
+	</FormField>
+	<FormField align="end">
 		<Switch bind:checked={onlyPositivePnl} />
 		<span slot="label">Only show positive PnL</span>
 	</FormField>
@@ -71,7 +84,11 @@
 		{#each history as type}
 			<Panel bind:open={panelOpened[type.type]}>
 				<Header>
-					<span> <Pnl pnl={type.pnl} />$ - {type.tradeCount} trades</span>
+					{#if pnlPerTrade}
+						<span> $<Pnl pnl={type.pnlPerTrade} /> per trade</span>
+					{:else}
+						<span> $<Pnl pnl={type.pnl} /> - {type.tradeCount} trades</span>
+					{/if}
 					<span slot="description" class="primary"
 						>{type.type}
 						<a href="/history/{type.watcher.type}/{type.watcher.config}">more...</a></span
