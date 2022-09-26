@@ -78,7 +78,11 @@
 				PNL<br />
 				<div><Pnl pnl={todaysPnl - todaysFees} />$</div>
 				<div>
-					(${Math.trunc(todaysPnl * 100) / 100}, ${Math.trunc(todaysFees * 100) / 100} fees)
+					<small class="small">
+						${Math.trunc(todaysPnl * 100) / 100}, ${Math.trunc(todaysFees * 100) / 100} fees
+						<br />
+						{todaysTrades.length} trades
+					</small>
 				</div>
 			</div>
 			<div class="summary-info">
@@ -142,5 +146,9 @@
 		justify-content: start;
 		align-items: start;
 		margin-left: 2rem;
+	}
+
+	.small {
+		font-size: 0.8rem;
 	}
 </style>

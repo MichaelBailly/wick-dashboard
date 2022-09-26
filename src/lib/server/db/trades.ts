@@ -37,7 +37,7 @@ type GetTradesMongoQuery = {
 	$and?: { boughtTimestamp: { $gte?: Date; $lt?: Date } }[];
 };
 
-export async function getTrades(opts: GetTradesOpts = {}): Promise<TradeRecordClient[] | null> {
+export async function getTrades(opts: GetTradesOpts = {}): Promise<TradeRecordClient[]> {
 	const sort = opts?.sort || SORT.DESC;
 	const sortField = opts?.sortField || SORT_FIELD.BOUGHT;
 	const query: GetTradesMongoQuery = {};
