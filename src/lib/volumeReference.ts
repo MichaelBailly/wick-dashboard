@@ -31,6 +31,7 @@ export const VolumeFamilies = [
 	}
 ];
 
+let volumeReference: { pair: string; volUsdt: number }[] = [];
 const pairVolumeFamily: Map<string, string> = new Map();
 
 export function getVolumeFamily(volume: string) {
@@ -38,10 +39,15 @@ export function getVolumeFamily(volume: string) {
 }
 
 export function loadReference(reference: { pair: string; volUsdt: number }[]) {
+	volumeReference = reference;
 	for (const { pair, volUsdt } of reference) {
 		const family = VolumeFamilies.find((f) => volUsdt >= f.min && volUsdt < f.max);
 		if (family) {
 			pairVolumeFamily.set(pair, family.name);
 		}
 	}
+}
+
+export function getReference() {
+	return [...volumeReference];
 }

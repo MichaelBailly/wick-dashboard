@@ -19,6 +19,7 @@
 		"@playwright/test": "^1.25.0",
 		"@smui-extra/accordion": "^6.1.1",
 		"@smui/button": "^6.1.0",
+		"@smui/checkbox": "^6.1.4",
 		"@smui/data-table": "^6.1.0",
 		"@smui/drawer": "^6.1.0",
 		"@smui/form-field": "^6.1.0",
@@ -51,6 +52,7 @@
 	"dependencies": {
 		"chart.js": "^3.9.1",
 		"chartjs-adapter-date-fns": "^2.0.0",
+		"chartjs-plugin-zoom": "^1.2.1",
 		"date-fns": "^2.29.3",
 		"mongodb": "^4.9.1"
 	}

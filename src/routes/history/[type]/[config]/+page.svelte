@@ -2,16 +2,21 @@
 	import { page } from '$app/stores';
 	import { FEE_PER_TRADE } from '$lib/constants.client';
 	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
+	import { getVolumeFamily, VolumeFamilies } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import TradesTable from '$lib/widgets/TradesTable.svelte';
 	import Button from '@smui/button';
+	import Checkbox from '@smui/checkbox';
+	import FormField from '@smui/form-field';
 	import Tab, { Label } from '@smui/tab';
 	import TabBar from '@smui/tab-bar';
 	import { add, format, startOfMonth } from 'date-fns';
 	import PnlGraph from './PnlGraph.svelte';
+	import VolSuccessRateGraph from './VolSuccessRateGraph.svelte';
 
-	/** @type {import('./$types').PageData} */
 	export let data: { trades: TradeRecordClient[] };
+
+	const selectedVolume: Record<string, boolean> = {};
 
 	const today = new Date();
 	const thisMonth = format(startOfMonth(today), 'yyyy-MM');
@@ -20,6 +25,26 @@
 	let period: string = '';
 	let pnl = 0;
 	let activeTab = 'Graph';
+	let activeTrades: TradeRecordClient[] = [...data.trades];
+
+	for (const volumeFamily of VolumeFamilies) {
+		selectedVolume[volumeFamily.name] = true;
+	}
+
+	$: {
+		if (Object.values(selectedVolume).every((v) => v)) {
+			activeTrades = [...data.trades];
+		} else {
+			let newActiveTrades: TradeRecordClient[] = [];
+			data.trades.forEach((t) => {
+				const familyName = getVolumeFamily(t.pair);
+				if (familyName && selectedVolume[familyName]) {
+					newActiveTrades.push(t);
+				}
+			});
+			activeTrades = newActiveTrades;
+		}
+	}
 
 	$: {
 		const urlPeriod = $page.url.searchParams.get('period');
@@ -35,15 +60,33 @@
 			period = 'last30days';
 		}
 
-		pnl = data.trades.reduce((acc, { pnl }) => acc + pnl, 0);
-		pnl -= FEE_PER_TRADE * data.trades.length;
+		pnl = activeTrades.reduce((acc, { pnl }) => acc + pnl, 0);
+		pnl -= FEE_PER_TRADE * activeTrades.length;
+	}
+
+	function isAllSelected() {
+		return Object.values(selectedVolume).every((v) => v);
+	}
+	function updateActiveTrades() {
+		if (isAllSelected()) {
+			activeTrades = [...data.trades];
+		} else {
+			let newActiveTrades: TradeRecordClient[] = [];
+			data.trades.forEach((t) => {
+				const familyName = getVolumeFamily(t.pair);
+				if (familyName && selectedVolume[familyName]) {
+					newActiveTrades.push(t);
+				}
+			});
+			activeTrades = newActiveTrades;
+		}
 	}
 </script>
 
 <h2>{$page.params.type} {$page.params.config}</h2>
 
 <h3>
-	PnL: $<Pnl {pnl} /> (including fees) - {data.trades.length} trades
+	PnL: $<Pnl {pnl} /> (including fees) - {activeTrades.length} trades
 </h3>
 
 <p>
@@ -104,6 +147,14 @@
 		</Button>
 	{/if}
 </p>
+<p>
+	{#each VolumeFamilies as family}
+		<FormField>
+			<Checkbox bind:checked={selectedVolume[family.name]} on:input={updateActiveTrades} />
+			<span slot="label">{family.label}</span>
+		</FormField>
+	{/each}
+</p>
 
 <TabBar tabs={['Graph', 'Data']} let:tab bind:active={activeTab}>
 	<Tab {tab}>
@@ -112,9 +163,12 @@
 </TabBar>
 <div class="tab-content">
 	{#if activeTab === 'Graph'}
-		<PnlGraph trades={data.trades} />
+		<PnlGraph trades={activeTrades} />
+		<p>
+			<VolSuccessRateGraph trades={activeTrades} />
+		</p>
 	{:else if activeTab === 'Data'}
-		<TradesTable trades={data.trades} />
+		<TradesTable trades={activeTrades} />
 	{/if}
 </div>
 
