@@ -78,7 +78,7 @@
 </div>
 
 <Paper>
-	<h3>PnL per volume family</h3>
+	<h3>PnL per volume family <small><a href="/history/v">More...</a></small></h3>
 	{#each pnlPerVol as { family, pnl, pnlPerTrade, tradeCount }}
 		<div>
 			{getFamilyLabel(family)}
