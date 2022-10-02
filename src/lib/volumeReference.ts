@@ -1,30 +1,30 @@
 export const VolumeFamilies = [
 	{
-		name: 'micro',
+		name: 'xs',
 		label: 'Micro',
 		min: 0,
 		max: 800000
 	},
 	{
-		name: 'small',
+		name: 's',
 		label: 'Small',
 		min: 800000,
 		max: 2000000
 	},
 	{
-		name: 'medium',
+		name: 'm',
 		label: 'Medium',
 		min: 2000000,
 		max: 5000000
 	},
 	{
-		name: 'large',
+		name: 'l',
 		label: 'Large',
 		min: 5000000,
 		max: 10000000
 	},
 	{
-		name: 'xlarge',
+		name: 'xl',
 		label: 'X-Large',
 		min: 10000000,
 		max: 2000000000000
