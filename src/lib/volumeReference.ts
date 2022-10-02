@@ -34,8 +34,13 @@ export const VolumeFamilies = [
 let volumeReference: { pair: string; volUsdt: number }[] = [];
 const pairVolumeFamily: Map<string, string> = new Map();
 
-export function getVolumeFamily(volume: string) {
-	return pairVolumeFamily.get(volume);
+export function getVolumeFamily(pair: string) {
+	return pairVolumeFamily.get(pair);
+}
+
+export function getFamilyLabel(familyName: string) {
+	const family = VolumeFamilies.find((f) => f.name === familyName);
+	return family ? family.label : '';
 }
 
 export function loadReference(reference: { pair: string; volUsdt: number }[]) {

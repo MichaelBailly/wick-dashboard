@@ -90,7 +90,7 @@
 					<div>
 						{w.type}
 						{w.config}: <Pnl pnl={w.pnl} />
-						({w.count} trades) <a href="/history/{w.type}/{w.config}">more...</a>
+						({w.count} trades) <a href="/history/t/{w.type}/{w.config}">more...</a>
 					</div>
 				{/each}
 			</div>

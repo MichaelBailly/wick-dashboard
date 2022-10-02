@@ -1,3 +1,4 @@
+import { isPnlPerType, type PnlPerType } from '$lib/types/PnlPerType';
 import type { TradeRecordClient } from 'src/lib/types/TradeRecordClient';
 import { getTradeCollection } from '.';
 
@@ -13,12 +14,19 @@ export enum SORT_FIELD {
 	SOLD
 }
 
-export type TradeHistoryOpts = {
-	type?: string;
-	config?: string;
+export type TradeTimeRangeOpts = {
 	start?: Date;
 	end?: Date;
 };
+
+type TradeTimeRangeMongoQuery = {
+	$and?: { boughtTimestamp: { $gte?: Date; $lt?: Date } }[];
+};
+
+export type TradeHistoryOpts = {
+	type?: string;
+	config?: string;
+} & TradeTimeRangeOpts;
 
 export type GetTradesOpts = {
 	type?: string;
@@ -32,8 +40,7 @@ export type GetTradesOpts = {
 type GetTradesMongoQuery = {
 	'watcher.type'?: string;
 	'watcher.config'?: string;
-	$and?: { boughtTimestamp: { $gte?: Date; $lt?: Date } }[];
-};
+} & TradeTimeRangeMongoQuery;
 
 export async function getTrades(opts: GetTradesOpts = {}): Promise<TradeRecordClient[]> {
 	const sort = opts?.sort || SORT.DESC;
@@ -78,4 +85,49 @@ function isTradeRecordClient(test: unknown): test is TradeRecordClient {
 		typeof test !== undefined &&
 		(test as TradeRecordClient)._id !== undefined
 	);
+}
+
+export async function getTradePnl(opts: TradeTimeRangeOpts = {}): Promise<PnlPerType[]> {
+	const query: TradeTimeRangeMongoQuery = {};
+
+	if (opts.start && opts.start instanceof Date) {
+		query.$and = [{ boughtTimestamp: { $gte: opts.start } }];
+	}
+	if (opts.end && opts.end instanceof Date) {
+		if (!query.$and) {
+			query.$and = [];
+		}
+		query.$and.push({ boughtTimestamp: { $lt: opts.end } });
+	}
+
+	const pipeline = [];
+	if (query.$and) {
+		pipeline.push({ $match: query });
+	}
+
+	pipeline.push({
+		$set: {
+			type: { $concat: ['$watcher.type', ' ', '$watcher.config'] }
+		}
+	});
+
+	pipeline.push({
+		$group: {
+			_id: '$type',
+			watcher: { $first: '$watcher' },
+			pnl: { $sum: '$pnl' },
+			tradeCount: { $sum: 1 }
+		}
+	});
+
+	pipeline.push({ $sort: { pnl: -1 } });
+
+	const collection = await getTradeCollection();
+	const trades = await collection.aggregate(pipeline).toArray();
+
+	if (trades.every(isPnlPerType)) {
+		return trades;
+	}
+
+	throw new Error('Unable to fetch pnlPerType');
 }

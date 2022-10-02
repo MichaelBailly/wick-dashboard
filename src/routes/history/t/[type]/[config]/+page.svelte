@@ -95,7 +95,7 @@
 			<Label>Last 30 days</Label>
 		</Button>
 	{:else}
-		<Button href="/history/{$page.params.type}/{$page.params.config}?period=last30days">
+		<Button href="/history/t/{$page.params.type}/{$page.params.config}?period=last30days">
 			<Label>Last 30 days</Label>
 		</Button>
 	{/if}
@@ -104,7 +104,7 @@
 			<Label>Last 7 days</Label>
 		</Button>
 	{:else}
-		<Button href="/history/{$page.params.type}/{$page.params.config}?period=last7days">
+		<Button href="/history/t/{$page.params.type}/{$page.params.config}?period=last7days">
 			<Label>Last 7 days</Label>
 		</Button>
 	{/if}
@@ -113,7 +113,7 @@
 			<Label>Last month</Label>
 		</Button>
 	{:else}
-		<Button href="/history/{$page.params.type}/{$page.params.config}?period={lastMonth}">
+		<Button href="/history/t/{$page.params.type}/{$page.params.config}?period={lastMonth}">
 			<Label>Last month</Label>
 		</Button>
 	{/if}
@@ -123,7 +123,7 @@
 			<Label>This month</Label>
 		</Button>
 	{:else}
-		<Button href="/history/{$page.params.type}/{$page.params.config}?period={thisMonth}">
+		<Button href="/history/t/{$page.params.type}/{$page.params.config}?period={thisMonth}">
 			<Label>This month</Label>
 		</Button>
 	{/if}
@@ -133,7 +133,7 @@
 			<Label>Yesterday</Label>
 		</Button>
 	{:else}
-		<Button href="/history/{$page.params.type}/{$page.params.config}?period=yesterday">
+		<Button href="/history/t/{$page.params.type}/{$page.params.config}?period=yesterday">
 			<Label>Yesterday</Label>
 		</Button>
 	{/if}
@@ -142,7 +142,7 @@
 			<Label>Today</Label>
 		</Button>
 	{:else}
-		<Button href="/history/{$page.params.type}/{$page.params.config}?period=today">
+		<Button href="/history/t/{$page.params.type}/{$page.params.config}?period=today">
 			<Label>Today</Label>
 		</Button>
 	{/if}

@@ -1,30 +1,24 @@
 <script lang="ts">
+	import { FEE_PER_TRADE } from '$lib/constants.client';
 	import { parseMonthStringOrNow } from '$lib/dates';
+	import type { PnlPerType } from '$lib/types/PnlPerType';
 	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
+	import { getFamilyLabel, getVolumeFamily } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
-	import Accordion, { Content, Header, Panel } from '@smui-extra/accordion';
 	import Button from '@smui/button';
-	import FormField from '@smui/form-field';
-	import IconButton, { Icon } from '@smui/icon-button';
 	import Paper from '@smui/paper';
-	import Switch from '@smui/switch';
 	import { add, format } from 'date-fns';
-	import VolumeSuccessRate from './VolumeSuccessRate.svelte';
-	import { perTradeType, type PerTradeTypeResponse } from './_helper';
 
 	/** @type {import('./$types').PageData} */
-	export let data: { trades: TradeRecordClient[]; period: string };
-
-	let panelOpened: Record<string, boolean> = {};
-
-	let history: PerTradeTypeResponse[] = [];
-	let onlyPositivePnl = false;
+	export let data: { trades: TradeRecordClient[]; period: string; pnlPerType: PnlPerType[] };
 
 	let period: string = '';
-	let pnlPerTrade = true;
 
 	let prevPeriod: { human: string; machine: string } = { human: '', machine: '' };
 	let nextPeriod: { human: string; machine: string } = { human: '', machine: '' };
+	let pnlPerVol: { family: string; pnl: number; pnlPerTrade: number; tradeCount: number }[] = [];
+	let pnlPerType: PnlPerType[] = [];
+
 	$: {
 		// dates navigation
 		const [year, month] = parseMonthStringOrNow(data.period);
@@ -41,84 +35,63 @@
 			machine: format(nextMonthDate, 'yyyy-MM')
 		};
 
-		//
 		// results formatting
-		//
-		history = perTradeType(data.trades);
+		const tradesPerVolume: Map<string, TradeRecordClient[]> = new Map();
 
-		if (pnlPerTrade) {
-			history = history.sort((a, b) => b.pnlPerTrade - a.pnlPerTrade);
-			if (onlyPositivePnl) {
-				history = history.filter((h) => h.pnlPerTrade > 0);
+		data.trades.forEach((trade) => {
+			const family = getVolumeFamily(trade.pair);
+			if (!family) {
+				return;
 			}
-		} else {
-			// sort hitory by pnl, highest first
-			history = history.sort((a, b) => b.pnl - a.pnl);
-			if (onlyPositivePnl) {
-				history = history.filter((h) => h.pnl > 0);
+			let trades = tradesPerVolume.get(family);
+			if (!trades) {
+				trades = [];
 			}
-		}
+			trades.push(trade);
+			tradesPerVolume.set(family, trades);
+		});
+		pnlPerVol = Array.from(tradesPerVolume.entries()).map(([family, trades]) => {
+			const pnl = trades.reduce((acc, trade) => acc + trade.pnl, 0) - trades.length * FEE_PER_TRADE;
+			const pnlPerTrade = pnl / trades.length;
+			return { family, pnl, pnlPerTrade, tradeCount: trades.length };
+		});
+		pnlPerVol.sort((a, b) => b.pnl - a.pnl);
+
+		pnlPerType = data.pnlPerType.map((pnlPerType) => {
+			return {
+				...pnlPerType,
+				pnl: pnlPerType.pnl - pnlPerType.tradeCount * FEE_PER_TRADE
+			};
+		});
+		pnlPerType.sort((a, b) => b.pnl - a.pnl);
 	}
 </script>
 
-<Paper>
-	<div class="head-container">
-		<h1>
-			{period}
-		</h1>
-		<div class="head-date-picker">
-			<Button href="/history?period={prevPeriod.machine}">{prevPeriod.human}</Button>
-			<Button href="/history?period={nextPeriod.machine}">{nextPeriod.human}</Button>
-		</div>
+<div class="head-container">
+	<h1>
+		{period}
+	</h1>
+	<div class="head-date-picker">
+		<Button href="/history?period={prevPeriod.machine}">{prevPeriod.human}</Button>
+		<Button href="/history?period={nextPeriod.machine}">{nextPeriod.human}</Button>
 	</div>
-	<FormField align="end">
-		<Switch bind:checked={pnlPerTrade} />
-		<span slot="label">PnL per Trade</span>
-	</FormField>
-	<FormField align="end">
-		<Switch bind:checked={onlyPositivePnl} />
-		<span slot="label">Only show positive PnL</span>
-	</FormField>
+</div>
 
-	<Accordion multiple>
-		{#each history as type}
-			<Panel bind:open={panelOpened[type.type]}>
-				<Header>
-					{#if pnlPerTrade}
-						<span> $<Pnl pnl={type.pnlPerTrade} /> per trade</span>
-					{:else}
-						<span> $<Pnl pnl={type.pnl} /> - {type.tradeCount} trades</span>
-					{/if}
-					<span slot="description" class="primary"
-						>{type.type}
-						<a href="/history/{type.watcher.type}/{type.watcher.config}">more...</a></span
-					>
+<Paper>
+	<h3>PnL per volume family</h3>
+	{#each pnlPerVol as { family, pnl, pnlPerTrade, tradeCount }}
+		<div>
+			{getFamilyLabel(family)}
+			<span>$<Pnl {pnl} /></span>
+			<span>$<Pnl pnl={pnlPerTrade} /> per trade, {tradeCount} trades</span>
+		</div>
+	{/each}
 
-					<IconButton slot="icon" toggle pressed={panelOpened[type.type]}>
-						<Icon class="material-icons" on>expand_less</Icon>
-						<Icon class="material-icons">expand_more</Icon>
-					</IconButton>
-				</Header>
-				<Content>
-					<VolumeSuccessRate {type} />
-				</Content>
-			</Panel>
-		{/each}
-	</Accordion>
+	<h3>PnL per watcher type <small><a href="/history/t">More...</a></small></h3>
+	{#each pnlPerType as typeRes}
+		<div>
+			{typeRes._id}
+			<span><Pnl pnl={typeRes.pnl} /> in {typeRes.tradeCount} trades</span>
+		</div>
+	{/each}
 </Paper>
-
-<style>
-	.primary {
-		color: #fbc02d;
-	}
-
-	.head-container {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-	}
-	.head-date-picker {
-		flex-grow: 1;
-		padding: 0 2rem;
-	}
-</style>
