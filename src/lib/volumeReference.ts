@@ -1,3 +1,6 @@
+/**
+ * @description families of volume reference types
+ */
 export const VolumeFamilies = [
 	{
 		name: 'xs',
@@ -34,17 +37,27 @@ export const VolumeFamilies = [
 let volumeReference: { pair: string; volUsdt: number }[] = [];
 const pairVolumeFamily: Map<string, string> = new Map();
 
+/**
+ * @description get volume family name for a pair
+ */
 export function getVolumeFamily(pair: string) {
 	return pairVolumeFamily.get(pair);
 }
 
+/**
+ * @description get label of a volume family name
+ */
 export function getFamilyLabel(familyName: string) {
 	const family = VolumeFamilies.find((f) => f.name === familyName);
 	return family ? family.label : '';
 }
 
+/**
+ * @description load volume reference data
+ */
 export function loadReference(reference: { pair: string; volUsdt: number }[]) {
 	volumeReference = reference;
+	pairVolumeFamily.clear();
 	for (const { pair, volUsdt } of reference) {
 		const family = VolumeFamilies.find((f) => volUsdt >= f.min && volUsdt < f.max);
 		if (family) {
