@@ -18,7 +18,7 @@
 	let panelOpened: Record<string, boolean> = {};
 
 	let history: PerTradeTypeResponse[] = [];
-	let onlyPositivePnl = false;
+	let showNegativePnL = false;
 
 	let period: string = '';
 	let pnlPerTrade = true;
@@ -48,13 +48,13 @@
 
 		if (pnlPerTrade) {
 			history = history.sort((a, b) => b.pnlPerTrade - a.pnlPerTrade);
-			if (onlyPositivePnl) {
+			if (!showNegativePnL) {
 				history = history.filter((h) => h.pnlPerTrade > 0);
 			}
 		} else {
 			// sort hitory by pnl, highest first
 			history = history.sort((a, b) => b.pnl - a.pnl);
-			if (onlyPositivePnl) {
+			if (!showNegativePnL) {
 				history = history.filter((h) => h.pnl > 0);
 			}
 		}
@@ -76,8 +76,8 @@
 		<span slot="label">PnL per Trade</span>
 	</FormField>
 	<FormField align="end">
-		<Switch bind:checked={onlyPositivePnl} />
-		<span slot="label">Only show positive PnL</span>
+		<Switch bind:checked={showNegativePnL} />
+		<span slot="label">Also show negative PnL</span>
 	</FormField>
 
 	<Accordion multiple>

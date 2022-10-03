@@ -3,11 +3,15 @@
 	import { parseMonthStringOrNow } from '$lib/dates';
 	import type { PnlPerType } from '$lib/types/PnlPerType';
 	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
-	import { getFamilyLabel, getVolumeFamily } from '$lib/volumeReference';
+	import { getFamilyLabel } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import Button from '@smui/button';
+	import DataTable, { Body, Cell, Head, Label, Row } from '@smui/data-table';
+	import FormField from '@smui/form-field';
 	import Paper from '@smui/paper';
+	import Switch from '@smui/switch';
 	import { add, format } from 'date-fns';
+	import { computePnlPerVolume, type PnlPerVol } from './helpers';
 
 	/** @type {import('./$types').PageData} */
 	export let data: { trades: TradeRecordClient[]; period: string; pnlPerType: PnlPerType[] };
@@ -16,7 +20,9 @@
 
 	let prevPeriod: { human: string; machine: string } = { human: '', machine: '' };
 	let nextPeriod: { human: string; machine: string } = { human: '', machine: '' };
-	let pnlPerVol: { family: string; pnl: number; pnlPerTrade: number; tradeCount: number }[] = [];
+
+	let showNegativePnL = false;
+	let pnlPerVol: PnlPerVol[] = [];
 	let pnlPerType: PnlPerType[] = [];
 
 	$: {
@@ -36,26 +42,7 @@
 		};
 
 		// results formatting
-		const tradesPerVolume: Map<string, TradeRecordClient[]> = new Map();
-
-		data.trades.forEach((trade) => {
-			const family = getVolumeFamily(trade.pair);
-			if (!family) {
-				return;
-			}
-			let trades = tradesPerVolume.get(family);
-			if (!trades) {
-				trades = [];
-			}
-			trades.push(trade);
-			tradesPerVolume.set(family, trades);
-		});
-		pnlPerVol = Array.from(tradesPerVolume.entries()).map(([family, trades]) => {
-			const pnl = trades.reduce((acc, trade) => acc + trade.pnl, 0) - trades.length * FEE_PER_TRADE;
-			const pnlPerTrade = pnl / trades.length;
-			return { family, pnl, pnlPerTrade, tradeCount: trades.length };
-		});
-		pnlPerVol.sort((a, b) => b.pnl - a.pnl);
+		pnlPerVol = computePnlPerVolume(data.trades);
 
 		pnlPerType = data.pnlPerType.map((pnlPerType) => {
 			return {
@@ -64,6 +51,10 @@
 			};
 		});
 		pnlPerType.sort((a, b) => b.pnl - a.pnl);
+
+		if (!showNegativePnL) {
+			pnlPerType = pnlPerType.filter((pnlPerType) => pnlPerType.pnl > 0);
+		}
 	}
 </script>
 
@@ -79,19 +70,72 @@
 
 <Paper>
 	<h3>PnL per volume family <small><a href="/history/v">More...</a></small></h3>
-	{#each pnlPerVol as { family, pnl, pnlPerTrade, tradeCount }}
-		<div>
-			{getFamilyLabel(family)}
-			<span>$<Pnl {pnl} /></span>
-			<span>$<Pnl pnl={pnlPerTrade} /> per trade, {tradeCount} trades</span>
-		</div>
-	{/each}
+
+	<DataTable style="width: 100%;">
+		<Head>
+			<Row>
+				<Cell columnId="volumeFamily">
+					<Label>Volume family</Label>
+				</Cell>
+				<Cell columnId="totalPnl">
+					<Label>PnL</Label>
+				</Cell>
+				<Cell columnId="PnlPerTrade">
+					<Label>Pnl per trade</Label>
+				</Cell>
+				<Cell columnId="tradeCount">
+					<Label>Trade Count</Label>
+				</Cell>
+			</Row>
+		</Head>
+		<Body>
+			{#each pnlPerVol as { family, pnl, pnlPerTrade, tradeCount }}
+				<Row>
+					<Cell>
+						{getFamilyLabel(family)}
+					</Cell>
+					<Cell>
+						$<Pnl {pnl} />
+					</Cell>
+					<Cell>
+						$<Pnl pnl={pnlPerTrade} />
+					</Cell>
+					<Cell>
+						{tradeCount}
+					</Cell>
+				</Row>
+			{/each}
+		</Body>
+	</DataTable>
 
 	<h3>PnL per watcher type <small><a href="/history/t">More...</a></small></h3>
-	{#each pnlPerType as typeRes}
-		<div>
-			{typeRes._id}
-			<span><Pnl pnl={typeRes.pnl} /> in {typeRes.tradeCount} trades</span>
-		</div>
-	{/each}
+	<FormField align="end">
+		<Switch bind:checked={showNegativePnL} />
+		<span slot="label">Show negative PnL</span>
+	</FormField>
+	<br />
+	<DataTable>
+		<Head>
+			<Row>
+				<Cell columnId="watcherType">
+					<Label>Watcher type</Label>
+				</Cell>
+				<Cell columnId="totalPnl">
+					<Label>PnL</Label>
+				</Cell>
+				<Cell columnId="tradeCount">
+					<Label>Trade Count</Label>
+				</Cell>
+			</Row>
+		</Head>
+		<Body>
+			{#each pnlPerType as typeRes}
+				<Row>
+					<Cell>{typeRes._id}</Cell>
+					<Cell>$<Pnl pnl={typeRes.pnl} /></Cell>
+					<Cell>{typeRes.tradeCount}</Cell>
+				</Row>
+			{/each}
+		</Body>
+	</DataTable>
 </Paper>
