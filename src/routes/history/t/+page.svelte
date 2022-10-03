@@ -61,16 +61,16 @@
 	}
 </script>
 
-<Paper>
-	<div class="head-container">
-		<h1>
-			{period}
-		</h1>
-		<div class="head-date-picker">
-			<Button href="/history/t?period={prevPeriod.machine}">{prevPeriod.human}</Button>
-			<Button href="/history/t?period={nextPeriod.machine}">{nextPeriod.human}</Button>
-		</div>
+<div class="head-container">
+	<h1>
+		{period}
+	</h1>
+	<div class="head-date-picker">
+		<Button href="/history/t?period={prevPeriod.machine}">{prevPeriod.human}</Button>
+		<Button href="/history/t?period={nextPeriod.machine}">{nextPeriod.human}</Button>
 	</div>
+</div>
+<div class="ff-container">
 	<FormField align="end">
 		<Switch bind:checked={pnlPerTrade} />
 		<span slot="label">PnL per Trade</span>
@@ -79,7 +79,9 @@
 		<Switch bind:checked={showNegativePnL} />
 		<span slot="label">Also show negative PnL</span>
 	</FormField>
+</div>
 
+<Paper>
 	<Accordion multiple>
 		{#each history as type}
 			<Panel bind:open={panelOpened[type.type]}>
@@ -119,5 +121,9 @@
 	.head-date-picker {
 		flex-grow: 1;
 		padding: 0 2rem;
+	}
+
+	.ff-container {
+		padding-bottom: 1rem;
 	}
 </style>
