@@ -71,10 +71,6 @@
 		<Button href="/history/v?period={nextPeriod.machine}">{nextPeriod.human}</Button>
 	</div>
 </div>
-<FormField align="end">
-	<Switch bind:checked={showNegativePnL} />
-	<span slot="label">Show negative PnL</span>
-</FormField>
 
 <TabBar tabs={[...tabLabels.keys()]} let:tab bind:active={activeTab}>
 	<Tab {tab}>
@@ -83,6 +79,11 @@
 </TabBar>
 <Paper>
 	{#if activeTab === 'single'}
+		<FormField align="end">
+			<Switch bind:checked={showNegativePnL} />
+			<span slot="label">Show negative PnL</span>
+		</FormField>
+		<br />
 		<DataTable>
 			<Head>
 				<Row>
