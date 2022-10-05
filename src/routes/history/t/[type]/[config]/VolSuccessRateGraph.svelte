@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { FEE_PER_TRADE } from '$lib/constants.client';
 	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
 	import { getReference } from '$lib/volumeReference';
 
@@ -146,7 +147,7 @@
 				continue;
 			}
 			let successRate = map.get(volUsdt) || [];
-			successRate.push(trade.pnl > 0 ? true : false);
+			successRate.push(trade.pnl - FEE_PER_TRADE > 0 ? true : false);
 			map.set(volUsdt, successRate);
 		}
 
