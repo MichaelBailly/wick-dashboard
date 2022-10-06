@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
+	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import DataTable, { Body, Cell, Head, Label, Row } from '@smui/data-table';
 	import { format, formatDistance } from 'date-fns';
 
-	export let trades: TradeRecordClient[];
+	export let trades: DashboardTrade[];
 </script>
 
 <DataTable style="width: 100%;">
@@ -61,7 +61,7 @@
 					{t.soldPrice}
 				</Cell>
 				<Cell>
-					<Pnl pnl={t.pnl} />
+					<Pnl pnl={t.netPnl} />
 				</Cell>
 			</Row>
 		{/each}

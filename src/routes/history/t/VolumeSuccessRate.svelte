@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { FEE_PER_TRADE } from '$lib/constants.client';
 	import { getVolumeFamily } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import type { PerTradeTypeResponse } from './_helper';
@@ -26,7 +25,7 @@
 					volumeAnalyses.set(family, analyses);
 				}
 				analyses.count++;
-				analyses.pnl += trade.pnl - FEE_PER_TRADE;
+				analyses.pnl += trade.netPnl;
 			});
 		});
 

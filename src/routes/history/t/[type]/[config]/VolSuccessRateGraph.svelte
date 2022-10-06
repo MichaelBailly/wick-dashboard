@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { FEE_PER_TRADE } from '$lib/constants.client';
-	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
+	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import { getReference } from '$lib/volumeReference';
 
-	export let trades: TradeRecordClient[];
+	export let trades: DashboardTrade[];
 
 	import {
 		CategoryScale,
@@ -138,7 +137,7 @@
 		});
 	});
 
-	function getGraphData(trades: TradeRecordClient[]) {
+	function getGraphData(trades: DashboardTrade[]) {
 		const graphData = [];
 		const map: Map<number, boolean[]> = new Map();
 		for (const trade of trades) {
@@ -147,7 +146,7 @@
 				continue;
 			}
 			let successRate = map.get(volUsdt) || [];
-			successRate.push(trade.pnl - FEE_PER_TRADE > 0 ? true : false);
+			successRate.push(trade.netPnl > 0 ? true : false);
 			map.set(volUsdt, successRate);
 		}
 

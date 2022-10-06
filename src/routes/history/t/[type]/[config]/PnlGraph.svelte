@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
+	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 
-	export let trades: TradeRecordClient[];
+	export let trades: DashboardTrade[];
 
 	import {
 		BarController,

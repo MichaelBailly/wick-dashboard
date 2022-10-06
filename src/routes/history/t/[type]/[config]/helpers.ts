@@ -1,7 +1,6 @@
-import { FEE_PER_TRADE } from '$lib/constants.client';
-import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
+import type { DashboardTrade } from '$lib/types/DashboardTrade';
 
-export function getTradesGraphData(trades: TradeRecordClient[]) {
+export function getTradesGraphData(trades: DashboardTrade[]) {
 	const allTrades = [...trades];
 	// sort allTrades by boughtTimestamp, older first
 	allTrades.sort((a, b) => a.boughtTimestamp.getTime() - b.boughtTimestamp.getTime());
@@ -11,11 +10,10 @@ export function getTradesGraphData(trades: TradeRecordClient[]) {
 	let cpnl = 0;
 	const labels: string[] = [];
 	allTrades.forEach((trade) => {
-		const tradePnl = trade.pnl - FEE_PER_TRADE;
-		cpnl += tradePnl;
+		cpnl += trade.netPnl;
 		pnl.push({
 			x: trade.boughtTimestamp,
-			y: tradePnl
+			y: trade.netPnl
 		});
 		cumulatedPnl.push({
 			x: trade.boughtTimestamp,

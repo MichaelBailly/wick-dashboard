@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { FEE_PER_TRADE } from '$lib/constants.client';
-	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
+	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import { getVolumeFamily, VolumeFamilies } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import TradesTable from '$lib/widgets/TradesTable.svelte';
@@ -14,7 +13,7 @@
 	import PnlGraph from './PnlGraph.svelte';
 	import VolSuccessRateGraph from './VolSuccessRateGraph.svelte';
 
-	export let data: { trades: TradeRecordClient[] };
+	export let data: { trades: DashboardTrade[] };
 
 	const selectedVolume: Record<string, boolean> = {};
 
@@ -25,7 +24,7 @@
 	let period: string = '';
 	let pnl = 0;
 	let activeTab = 'Graph';
-	let activeTrades: TradeRecordClient[] = [...data.trades];
+	let activeTrades: DashboardTrade[] = [...data.trades];
 
 	for (const volumeFamily of VolumeFamilies) {
 		selectedVolume[volumeFamily.name] = true;
@@ -35,7 +34,7 @@
 		if (Object.values(selectedVolume).every((v) => v)) {
 			activeTrades = [...data.trades];
 		} else {
-			let newActiveTrades: TradeRecordClient[] = [];
+			let newActiveTrades: DashboardTrade[] = [];
 			data.trades.forEach((t) => {
 				const familyName = getVolumeFamily(t.pair);
 				if (familyName && selectedVolume[familyName]) {
@@ -60,8 +59,7 @@
 			period = 'last30days';
 		}
 
-		pnl = activeTrades.reduce((acc, { pnl }) => acc + pnl, 0);
-		pnl -= FEE_PER_TRADE * activeTrades.length;
+		pnl = activeTrades.reduce((acc, { netPnl }) => acc + netPnl, 0);
 	}
 
 	function isAllSelected() {
@@ -71,7 +69,7 @@
 		if (isAllSelected()) {
 			activeTrades = [...data.trades];
 		} else {
-			let newActiveTrades: TradeRecordClient[] = [];
+			let newActiveTrades: DashboardTrade[] = [];
 			data.trades.forEach((t) => {
 				const familyName = getVolumeFamily(t.pair);
 				if (familyName && selectedVolume[familyName]) {

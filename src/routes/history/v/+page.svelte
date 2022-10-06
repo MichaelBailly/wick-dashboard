@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { parseMonthStringOrNow } from '$lib/dates';
-	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
+	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import Button from '@smui/button';
 	import DataTable, { Body, Cell, Head, Label, Row } from '@smui/data-table';
@@ -18,7 +18,7 @@
 	} from './helper';
 
 	/** @type {import('./$types').PageData} */
-	export let data: { trades: TradeRecordClient[]; period: string };
+	export let data: { trades: DashboardTrade[]; period: string };
 
 	let period: string = '';
 

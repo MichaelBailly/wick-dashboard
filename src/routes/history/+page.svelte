@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { FEE_PER_TRADE } from '$lib/constants.client';
 	import { parseMonthStringOrNow } from '$lib/dates';
+	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import type { PnlPerType } from '$lib/types/PnlPerType';
-	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
 	import { getFamilyLabel } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import Button from '@smui/button';
@@ -11,10 +10,10 @@
 	import Paper from '@smui/paper';
 	import Switch from '@smui/switch';
 	import { add, format } from 'date-fns';
-	import { computePnlPerVolume, type PnlPerVol } from './helpers';
+	import { computePnlPerType, computePnlPerVolume, type PnlPerVol } from './helpers';
 
 	/** @type {import('./$types').PageData} */
-	export let data: { trades: TradeRecordClient[]; period: string; pnlPerType: PnlPerType[] };
+	export let data: { trades: DashboardTrade[]; period: string; pnlPerType: PnlPerType[] };
 
 	let period: string = '';
 
@@ -43,18 +42,7 @@
 
 		// results formatting
 		pnlPerVol = computePnlPerVolume(data.trades);
-
-		pnlPerType = data.pnlPerType.map((pnlPerType) => {
-			return {
-				...pnlPerType,
-				pnl: pnlPerType.pnl - pnlPerType.tradeCount * FEE_PER_TRADE
-			};
-		});
-		pnlPerType.sort((a, b) => b.pnl - a.pnl);
-
-		if (!showNegativePnL) {
-			pnlPerType = pnlPerType.filter((pnlPerType) => pnlPerType.pnl > 0);
-		}
+		pnlPerType = computePnlPerType(data.pnlPerType, showNegativePnL);
 	}
 </script>
 

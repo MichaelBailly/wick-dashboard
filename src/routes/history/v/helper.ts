@@ -1,5 +1,4 @@
-import { FEE_PER_TRADE } from '$lib/constants.client';
-import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
+import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import { getFamilyLabel, getVolumeFamily } from '$lib/volumeReference';
 
 export type PnlPerTypePerVolumeFamily = {
@@ -12,10 +11,7 @@ export type PnlPerTypePerVolumeFamily = {
 	};
 };
 
-export function computePerTypePerVolumeFamily(
-	trades: TradeRecordClient[],
-	showNegativePnL: boolean
-) {
+export function computePerTypePerVolumeFamily(trades: DashboardTrade[], showNegativePnL: boolean) {
 	let pnlPerTypePerVolumeFamily: PnlPerTypePerVolumeFamily[] = [];
 	trades.forEach((t) => {
 		const family = getVolumeFamily(t.pair);
@@ -35,7 +31,7 @@ export function computePerTypePerVolumeFamily(
 			};
 			pnlPerTypePerVolumeFamily.push(pptpvf);
 		}
-		pptpvf.pnl += t.pnl - FEE_PER_TRADE;
+		pptpvf.pnl += t.netPnl;
 		pptpvf.tradeCount += 1;
 	});
 	pnlPerTypePerVolumeFamily = pnlPerTypePerVolumeFamily
@@ -63,7 +59,7 @@ export type BestGroup = {
 	families: string[];
 };
 
-export function computeBestGroupPerType(trades: TradeRecordClient[]) {
+export function computeBestGroupPerType(trades: DashboardTrade[]) {
 	let bestGroupPerType: BestGroup[] = [];
 	trades.forEach((t) => {
 		const family = getVolumeFamily(t.pair);
@@ -87,7 +83,7 @@ export function computeBestGroupPerType(trades: TradeRecordClient[]) {
 			};
 			bestGroupPerType.push(bgt);
 		}
-		bgt[family] += t.pnl - FEE_PER_TRADE;
+		bgt[family] += t.netPnl;
 	});
 	for (const b of bestGroupPerType) {
 		for (const f of ['xs', 's', 'm', 'l', 'xl']) {

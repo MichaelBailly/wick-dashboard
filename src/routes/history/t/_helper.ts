@@ -1,4 +1,4 @@
-import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
+import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import { format } from 'date-fns';
 
 export type PerTradeTypeResponseInternal = {
@@ -13,7 +13,7 @@ export type PerTradeTypeResponseInternal = {
 		history: {
 			date: string;
 			pnl: number;
-			trades: TradeRecordClient[];
+			trades: DashboardTrade[];
 		}[];
 	};
 };
@@ -30,13 +30,11 @@ export type PerTradeTypeResponse = {
 	history: {
 		date: string;
 		pnl: number;
-		trades: TradeRecordClient[];
+		trades: DashboardTrade[];
 	}[];
 };
 
-const FEE_PER_TRADE = 0.15;
-
-export function perTradeType(trades: TradeRecordClient[]): PerTradeTypeResponse[] {
+export function perTradeType(trades: DashboardTrade[]): PerTradeTypeResponse[] {
 	const perTradeType: PerTradeTypeResponseInternal = {};
 	for (const trade of trades) {
 		const date = format(trade.boughtTimestamp, 'yyyy-MM-dd');
@@ -49,7 +47,7 @@ export function perTradeType(trades: TradeRecordClient[]): PerTradeTypeResponse[
 				history: []
 			};
 		}
-		perTradeType[tradeType].pnl += trade.pnl;
+		perTradeType[tradeType].pnl += trade.netPnl;
 		perTradeType[tradeType].tradeCount++;
 		let dayData = perTradeType[tradeType].history.find((d) => d.date === date);
 		if (!dayData) {
@@ -60,20 +58,19 @@ export function perTradeType(trades: TradeRecordClient[]): PerTradeTypeResponse[
 			};
 			perTradeType[tradeType].history.push(dayData);
 		}
-		dayData.pnl += trade.pnl;
+		dayData.pnl += trade.netPnl;
 		dayData.trades.push(trade);
 	}
 
 	const result: PerTradeTypeResponse[] = [];
 
 	Object.keys(perTradeType).forEach((key) => {
-		const pnl = perTradeType[key].pnl - perTradeType[key].tradeCount * FEE_PER_TRADE;
 		result.push({
 			type: key,
 			watcher: perTradeType[key].watcher,
-			pnl: pnl,
+			pnl: perTradeType[key].pnl,
 			tradeCount: perTradeType[key].tradeCount,
-			pnlPerTrade: pnl / perTradeType[key].tradeCount,
+			pnlPerTrade: perTradeType[key].pnl / perTradeType[key].tradeCount,
 			history: perTradeType[key].history
 		});
 	});

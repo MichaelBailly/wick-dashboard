@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { FEE_PER_TRADE } from '$lib/constants.client';
-	import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
+	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import TradesTable from '$lib/widgets/TradesTable.svelte';
 	import Accordion, { Content as AContent, Header, Panel } from '@smui-extra/accordion';
@@ -11,14 +10,15 @@
 	import { add, format } from 'date-fns';
 
 	/** @type {import('./$types').PageData} */
-	export let data: { trades: TradeRecordClient[] };
+	export let data: { trades: DashboardTrade[] };
 	let tradeAccordionOpen: boolean = false;
 
 	let date: Date;
 	let yesterday: string;
 	let tomorrow: string;
-	let todaysTrades: TradeRecordClient[];
+	let todaysTrades: DashboardTrade[];
 	let todaysPnl: number;
+	let todaysNetPnl: number;
 	let todaysFees: number;
 	let todaysPnlPerWatcher: { type: string; config: string; pnl: number; count: number }[] = [];
 
@@ -37,8 +37,9 @@
 		tomorrow = format(add(date, { days: 1 }), 'yyyy-MM-dd');
 
 		todaysTrades = data.trades;
-		todaysPnl = todaysTrades.reduce((acc: number, t: TradeRecordClient) => acc + t.pnl, 0);
-		todaysFees = todaysTrades.length * FEE_PER_TRADE;
+		todaysPnl = todaysTrades.reduce((acc: number, t: DashboardTrade) => acc + t.pnl, 0);
+		todaysNetPnl = todaysTrades.reduce((acc: number, t: DashboardTrade) => acc + t.netPnl, 0);
+		todaysFees = todaysPnl - todaysNetPnl;
 		for (const t of todaysTrades) {
 			const watcher = todaysPnlPerWatcher.find(
 				(w) => w.type === t.watcher.type && w.config === t.watcher.config
@@ -76,10 +77,10 @@
 		<div class="summary-container">
 			<div class="summary-total-pnl">
 				PNL<br />
-				<div><Pnl pnl={todaysPnl - todaysFees} />$</div>
+				<div>$<Pnl pnl={todaysNetPnl} /></div>
 				<div>
 					<small class="small">
-						${Math.trunc(todaysPnl * 100) / 100}, ${Math.trunc(todaysFees * 100) / 100} fees
+						${Math.trunc(todaysFees * 100) / 100} fees
 						<br />
 						{todaysTrades.length} trades
 					</small>
