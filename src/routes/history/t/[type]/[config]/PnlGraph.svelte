@@ -116,6 +116,9 @@
 							date: {
 								locale: enUS
 							}
+						},
+						time: {
+							unit: 'day'
 						}
 					},
 					y2: {
