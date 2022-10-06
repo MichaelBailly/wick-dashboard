@@ -2,7 +2,7 @@
 	import { parseMonthStringOrNow } from '$lib/dates';
 	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import Pnl from '$lib/widgets/Pnl.svelte';
-	import Button from '@smui/button';
+	import Button, { Icon } from '@smui/button';
 	import DataTable, { Body, Cell, Head, Label, Row } from '@smui/data-table';
 	import FormField from '@smui/form-field';
 	import Paper from '@smui/paper';
@@ -67,8 +67,14 @@
 		{period}
 	</h1>
 	<div class="head-date-picker">
-		<Button href="/history/v?period={prevPeriod.machine}">{prevPeriod.human}</Button>
-		<Button href="/history/v?period={nextPeriod.machine}">{nextPeriod.human}</Button>
+		<Button href="/history/v?period={prevPeriod.machine}">
+			<Icon class="material-icons">chevron_left</Icon>
+			<Label>{prevPeriod.human}</Label>
+		</Button>
+		<Button href="/history/v?period={nextPeriod.machine}">
+			<Label>{nextPeriod.human}</Label>
+			<Icon class="material-icons">chevron_right</Icon>
+		</Button>
 	</div>
 </div>
 
@@ -136,3 +142,15 @@
 		</DataTable>
 	{/if}
 </Paper>
+
+<style>
+	.head-container {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+	}
+	.head-date-picker {
+		flex-grow: 1;
+		padding: 0 2rem;
+	}
+</style>

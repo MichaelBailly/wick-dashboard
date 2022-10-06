@@ -3,7 +3,7 @@
 	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import Accordion, { Content, Header, Panel } from '@smui-extra/accordion';
-	import Button from '@smui/button';
+	import Button, { Label } from '@smui/button';
 	import FormField from '@smui/form-field';
 	import IconButton, { Icon } from '@smui/icon-button';
 	import Paper from '@smui/paper';
@@ -66,8 +66,14 @@
 		{period}
 	</h1>
 	<div class="head-date-picker">
-		<Button href="/history/t?period={prevPeriod.machine}">{prevPeriod.human}</Button>
-		<Button href="/history/t?period={nextPeriod.machine}">{nextPeriod.human}</Button>
+		<Button href="/history/t?period={prevPeriod.machine}">
+			<Icon class="material-icons">chevron_left</Icon>
+
+			<Label>{prevPeriod.human}</Label></Button>
+		<Button href="/history/t?period={nextPeriod.machine}">
+			{nextPeriod.human}
+			<Icon class="material-icons">chevron_right</Icon>
+		</Button>
 	</div>
 </div>
 <div class="ff-container">

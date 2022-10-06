@@ -4,7 +4,7 @@
 	import type { PnlPerType } from '$lib/types/PnlPerType';
 	import { getFamilyLabel } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
-	import Button from '@smui/button';
+	import Button, { Icon } from '@smui/button';
 	import DataTable, { Body, Cell, Head, Label, Row } from '@smui/data-table';
 	import FormField from '@smui/form-field';
 	import Paper from '@smui/paper';
@@ -51,14 +51,19 @@
 		{period}
 	</h1>
 	<div class="head-date-picker">
-		<Button href="/history?period={prevPeriod.machine}">{prevPeriod.human}</Button>
-		<Button href="/history?period={nextPeriod.machine}">{nextPeriod.human}</Button>
+		<Button href="/history?period={prevPeriod.machine}">
+			<Icon class="material-icons">chevron_left</Icon>
+			<Label>{prevPeriod.human}</Label>
+		</Button>
+		<Button href="/history?period={nextPeriod.machine}">
+			<Label>{nextPeriod.human}</Label>
+			<Icon class="material-icons">chevron_right</Icon>
+		</Button>
 	</div>
 </div>
 
 <Paper>
 	<h3>PnL per volume family <small><a href="/history/v">More...</a></small></h3>
-
 	<DataTable style="width: 100%;">
 		<Head>
 			<Row>
@@ -95,7 +100,7 @@
 			{/each}
 		</Body>
 	</DataTable>
-
+</Paper><br /><Paper>
 	<h3>PnL per watcher type <small><a href="/history/t">More...</a></small></h3>
 	<FormField align="end">
 		<Switch bind:checked={showNegativePnL} />
@@ -127,3 +132,19 @@
 		</Body>
 	</DataTable>
 </Paper>
+
+<style>
+	.head-container {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+	}
+	.head-date-picker {
+		flex-grow: 1;
+		padding: 0 2rem;
+	}
+
+	h3 {
+		margin-top: 0;
+	}
+</style>
