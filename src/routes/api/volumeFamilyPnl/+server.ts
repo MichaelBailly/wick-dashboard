@@ -2,7 +2,7 @@ import { getDateAtMidnightUTC } from '$lib/dates';
 import { ensureReferencesAreLoaded, toDashboardTrade } from '$lib/server/dashboardTradeConverter';
 import { getTrades } from '$lib/server/db/trades';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
-import { FamilyId } from '$lib/volumeReference';
+import type { FamilyId } from '$lib/volumeReference';
 import { format, startOfMonth, sub } from 'date-fns';
 
 /** @type {import('./$types').RequestHandler} */
