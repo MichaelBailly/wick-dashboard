@@ -19,6 +19,9 @@
 				<Item href="/history">
 					<Text>History</Text>
 				</Item>
+				<Item href="/trends">
+					<Text>Trends</Text>
+				</Item>
 			</List>
 		</Content>
 	</Drawer>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { getVolumeFamily } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import type { PerTradeTypeResponse } from './_helper';
 
@@ -11,7 +10,7 @@
 		volumeAnalyses = new Map();
 		type.history.forEach((day) => {
 			day.trades.forEach((trade) => {
-				const family = getVolumeFamily(trade.pair);
+				const family = trade.volumeFamily;
 				if (!family) {
 					return;
 				}

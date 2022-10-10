@@ -1,3 +1,5 @@
+import type { FamilyId } from '$lib/volumeReference';
+
 export type TradeRecordClient = {
 	_id: string;
 	id: string;
@@ -10,6 +12,7 @@ export type TradeRecordClient = {
 	soldTimestamp: Date;
 	low: number;
 	pair: string;
+	volumeFamily: FamilyId;
 	soldAmount: number;
 	soldPrice: number;
 	pnl: number;

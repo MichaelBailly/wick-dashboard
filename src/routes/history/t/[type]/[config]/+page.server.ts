@@ -1,6 +1,6 @@
 import { getAtMidnightUTC, getTodayAtMidnightUTC } from '$lib/dates';
+import { ensureReferencesAreLoaded, toDashboardTrade } from '$lib/server/dashboardTradeConverter';
 import { getTrades, type TradeHistoryOpts } from '$lib/server/db/trades';
-import { getNetPnl } from '$lib/tradeUtils';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import type { HistoryTypeLoadArgs } from '$lib/types/HistoryTypeLoadArgs';
 import { add } from 'date-fns';
@@ -32,11 +32,9 @@ export async function load({ url, params }: HistoryTypeLoadArgs) {
 	const opts: TradeHistoryOpts = { type: params.type, config: params.config, start, end };
 
 	const trades = await getTrades(opts);
+	await ensureReferencesAreLoaded();
 
-	const dbTrades: DashboardTrade[] = trades.map((trade) => ({
-		...trade,
-		netPnl: getNetPnl(trade)
-	}));
+	const dbTrades: DashboardTrade[] = trades.map(toDashboardTrade);
 
 	return {
 		trades: dbTrades

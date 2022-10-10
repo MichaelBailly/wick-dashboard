@@ -1,6 +1,6 @@
 import { getAtMidnightUTC, getTodayAtMidnightUTC } from '$lib/dates';
+import { ensureReferencesAreLoaded, toDashboardTrade } from '$lib/server/dashboardTradeConverter';
 import { getTrades } from '$lib/server/db/trades';
-import { getNetPnl } from '$lib/tradeUtils';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import { error, type ServerLoadEvent } from '@sveltejs/kit';
 import { add } from 'date-fns';
@@ -23,10 +23,9 @@ export async function load({ url }: ServerLoadEvent) {
 	}
 	const trades = await getTrades({ start, end });
 
-	const dashboardTrades: DashboardTrade[] = trades.map((trade) => ({
-		...trade,
-		netPnl: getNetPnl(trade)
-	}));
+	await ensureReferencesAreLoaded();
+
+	const dashboardTrades: DashboardTrade[] = trades.map(toDashboardTrade);
 
 	return {
 		trades: dashboardTrades

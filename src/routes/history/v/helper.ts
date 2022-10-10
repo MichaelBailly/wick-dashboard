@@ -1,5 +1,5 @@
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
-import { getFamilyLabel, getVolumeFamily } from '$lib/volumeReference';
+import { FamilyId, getFamilyLabel } from '$lib/volumeReference';
 
 export type PnlPerTypePerVolumeFamily = {
 	volumeFamily: string;
@@ -14,7 +14,7 @@ export type PnlPerTypePerVolumeFamily = {
 export function computePerTypePerVolumeFamily(trades: DashboardTrade[], showNegativePnL: boolean) {
 	let pnlPerTypePerVolumeFamily: PnlPerTypePerVolumeFamily[] = [];
 	trades.forEach((t) => {
-		const family = getVolumeFamily(t.pair);
+		const family = t.volumeFamily;
 		if (!family) return;
 		let pptpvf = pnlPerTypePerVolumeFamily.find(
 			(p) =>
@@ -62,11 +62,17 @@ export type BestGroup = {
 export function computeBestGroupPerType(trades: DashboardTrade[]) {
 	let bestGroupPerType: BestGroup[] = [];
 	trades.forEach((t) => {
-		const family = getVolumeFamily(t.pair);
+		const family = t.volumeFamily;
 		if (!family) return;
-		if (family !== 'xs' && family !== 's' && family !== 'm' && family !== 'l' && family !== 'xl')
+		if (
+			family !== FamilyId.xs &&
+			family !== FamilyId.s &&
+			family !== FamilyId.m &&
+			family !== FamilyId.l &&
+			family !== FamilyId.xl
+		) {
 			return;
-
+		}
 		let bgt = bestGroupPerType.find(
 			(p) => p.watcher.type === t.watcher.type && p.watcher.config === t.watcher.config
 		);

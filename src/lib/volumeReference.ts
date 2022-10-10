@@ -1,33 +1,42 @@
+export enum FamilyId {
+	xs = 'xs',
+	s = 's',
+	m = 'm',
+	l = 'l',
+	xl = 'xl',
+	unknown = 'unknown'
+}
+
 /**
  * @description families of volume reference types
  */
 export const VolumeFamilies = [
 	{
-		name: 'xs',
+		name: FamilyId.xs,
 		label: 'Micro',
 		min: 0,
 		max: 800000
 	},
 	{
-		name: 's',
+		name: FamilyId.s,
 		label: 'Small',
 		min: 800000,
 		max: 2000000
 	},
 	{
-		name: 'm',
+		name: FamilyId.m,
 		label: 'Medium',
 		min: 2000000,
 		max: 5000000
 	},
 	{
-		name: 'l',
+		name: FamilyId.l,
 		label: 'Large',
 		min: 5000000,
 		max: 10000000
 	},
 	{
-		name: 'xl',
+		name: FamilyId.xl,
 		label: 'X-Large',
 		min: 10000000,
 		max: 2000000000000
@@ -35,13 +44,13 @@ export const VolumeFamilies = [
 ];
 
 let volumeReference: { pair: string; volUsdt: number }[] = [];
-const pairVolumeFamily: Map<string, string> = new Map();
+const pairVolumeFamily: Map<string, FamilyId> = new Map();
 
 /**
  * @description get volume family name for a pair
  */
 export function getVolumeFamily(pair: string) {
-	return pairVolumeFamily.get(pair);
+	return pairVolumeFamily.get(pair) || FamilyId.unknown;
 }
 
 /**
@@ -68,4 +77,8 @@ export function loadReference(reference: { pair: string; volUsdt: number }[]) {
 
 export function getReference() {
 	return [...volumeReference];
+}
+
+export function isVolumeFamilyId(obj: unknown): obj is FamilyId {
+	return typeof obj === 'string' && Object.values(FamilyId).includes(obj as FamilyId);
 }

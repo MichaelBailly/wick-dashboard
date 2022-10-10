@@ -1,7 +1,6 @@
 import { FEE_PER_TRADE } from '$lib/constants.client';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import type { PnlPerType } from '$lib/types/PnlPerType';
-import { getVolumeFamily } from '$lib/volumeReference';
 
 export type PnlPerVol = {
 	family: string;
@@ -15,7 +14,7 @@ export function computePnlPerVolume(trades: DashboardTrade[]) {
 	const tradesPerVolume: Map<string, DashboardTrade[]> = new Map();
 
 	trades.forEach((trade) => {
-		const family = getVolumeFamily(trade.pair);
+		const family = trade.volumeFamily;
 		if (!family) {
 			return;
 		}

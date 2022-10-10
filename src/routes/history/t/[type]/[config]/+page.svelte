@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import type { DashboardTrade } from '$lib/types/DashboardTrade';
-	import { getVolumeFamily, VolumeFamilies } from '$lib/volumeReference';
+	import { VolumeFamilies } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import TradesTable from '$lib/widgets/TradesTable.svelte';
 	import Button from '@smui/button';
@@ -36,7 +36,7 @@
 		} else {
 			let newActiveTrades: DashboardTrade[] = [];
 			data.trades.forEach((t) => {
-				const familyName = getVolumeFamily(t.pair);
+				const familyName = t.volumeFamily;
 				if (familyName && selectedVolume[familyName]) {
 					newActiveTrades.push(t);
 				}
@@ -71,7 +71,7 @@
 		} else {
 			let newActiveTrades: DashboardTrade[] = [];
 			data.trades.forEach((t) => {
-				const familyName = getVolumeFamily(t.pair);
+				const familyName = t.volumeFamily;
 				if (familyName && selectedVolume[familyName]) {
 					newActiveTrades.push(t);
 				}
