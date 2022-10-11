@@ -2,6 +2,7 @@
 	import { getFamilyLabel } from '$lib/volumeReference';
 	import DataTable, { Body, Cell, Head, Label } from '@smui/data-table';
 	import Row from '@smui/data-table/src/Row.svelte';
+	import LinearProgress from '@smui/linear-progress';
 	import Paper from '@smui/paper';
 	import { onMount } from 'svelte';
 	import Pnl from './Pnl.svelte';
@@ -25,6 +26,8 @@
 	}> = [];
 
 	let months: string[] = [];
+
+	let loaded = false;
 
 	$: {
 		composedData = [];
@@ -53,6 +56,7 @@
 	onMount(async () => {
 		const response = await fetch('/api/volumeFamilyPnl');
 		families = await response.json();
+		loaded = true;
 	});
 </script>
 
@@ -95,5 +99,10 @@
 				</Row>
 			{/each}
 		</Body>
+		<LinearProgress
+			indeterminate
+			bind:closed={loaded}
+			aria-label="Data is being loaded..."
+			slot="progress" />
 	</DataTable>
 </Paper>
