@@ -7,6 +7,8 @@
 	import { onMount } from 'svelte';
 	import Pnl from './Pnl.svelte';
 
+	export let months: number = 2;
+
 	type PositiveNetPnls = {
 		volumeFamilyId: string;
 		netPnl: number;
@@ -25,7 +27,7 @@
 		positiveNetPnls: PositiveNetPnls;
 	}> = [];
 
-	let months: string[] = [];
+	let monthsData: string[] = [];
 
 	let loaded = false;
 
@@ -33,7 +35,7 @@
 		composedData = [];
 		if (families.length) {
 			const fam = families[0];
-			months = fam.positiveNetPnls[0].details.map((d) => d.month);
+			monthsData = fam.positiveNetPnls[0].details.map((d) => d.month);
 
 			for (const family of families) {
 				const perMonthPnl: number[] = [];
@@ -54,7 +56,7 @@
 	}
 
 	onMount(async () => {
-		const response = await fetch('/api/volumeFamilyPnl');
+		const response = await fetch(`/api/volumeFamilyPnl?months=${months}`);
 		families = await response.json();
 		loaded = true;
 	});
@@ -72,7 +74,7 @@
 				<Cell columnId="volumeFamily">
 					<Label>Volume families</Label>
 				</Cell>
-				{#each months as month}
+				{#each monthsData as month}
 					<Cell columnId={month}>
 						<Label>{month}</Label>
 					</Cell>

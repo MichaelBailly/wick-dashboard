@@ -1,4 +1,5 @@
 import { isPnlPerType, type PnlPerType } from '$lib/types/PnlPerType';
+import { sub } from 'date-fns';
 import type { TradeRecordClient } from 'src/lib/types/TradeRecordClient';
 import { getTradeCollection } from '.';
 
@@ -35,6 +36,13 @@ export type GetTradesOpts = {
 	end?: Date;
 	sort?: SORT;
 	sortField?: SORT_FIELD;
+};
+
+export type PnlPerDay = {
+	_id: string;
+	pnl: number;
+	netPnl: number;
+	tradeCount: number;
 };
 
 type GetTradesMongoQuery = {
@@ -130,4 +138,66 @@ export async function getTradePnl(opts: TradeTimeRangeOpts = {}): Promise<PnlPer
 	}
 
 	throw new Error('Unable to fetch pnlPerType');
+}
+
+export async function getPnlPerDay(opts: TradeTimeRangeOpts = {}): Promise<PnlPerDay[]> {
+	const query: TradeTimeRangeMongoQuery = {};
+	const start = opts.start || sub(new Date(), { months: 3 });
+	const end = opts.end || null;
+
+	query.$and = [{ boughtTimestamp: { $gte: start } }];
+	if (end && end instanceof Date) {
+		query.$and.push({ boughtTimestamp: { $lt: end } });
+	}
+
+	const pipeline = [
+		{
+			$match: query,
+			$addFields: {
+				netPnl: {
+					$subtract: [
+						{ $subtract: [{ $multiply: ['$soldAmount', '$soldPrice'] }, '$quoteAmount'] },
+						{
+							$add: [
+								{ $multiply: ['$quoteAmount', 0.00075] },
+								{ $multiply: ['$soldAmount', '$soldPrice', 0.00075] }
+							]
+						}
+					]
+				},
+				boughtMonth: { $dateToString: { format: '%Y-%m-%d', date: '$boughtTimestamp' } }
+			}
+		},
+		{
+			$group: {
+				_id: '$boughtMonth',
+				netPnl: { $sum: '$netPnl' },
+				pnl: { $sum: '$pnl' },
+				docs: { $sum: 1 }
+			}
+		},
+		{
+			$sort: { _id: 1 }
+		}
+	];
+
+	const collection = await getTradeCollection();
+	const trades = await collection.aggregate(pipeline).toArray();
+
+	if (trades.every(isPnlPerDay)) {
+		return trades;
+	}
+
+	throw new Error('Unable to fetch pnlPerDay');
+}
+
+export function isPnlPerDay(test: unknown): test is PnlPerDay {
+	return (
+		typeof test !== null &&
+		typeof test !== undefined &&
+		(test as PnlPerDay)._id !== undefined &&
+		typeof (test as PnlPerDay).pnl === 'number' &&
+		typeof (test as PnlPerDay).netPnl === 'number' &&
+		typeof (test as PnlPerDay).tradeCount === 'number'
+	);
 }
