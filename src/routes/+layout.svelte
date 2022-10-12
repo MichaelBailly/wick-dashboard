@@ -19,8 +19,8 @@
 				<Item href="/history">
 					<Text>History</Text>
 				</Item>
-				<Item href="/trends">
-					<Text>Trends</Text>
+				<Item href="/daily">
+					<Text>Daily PnL</Text>
 				</Item>
 			</List>
 		</Content>

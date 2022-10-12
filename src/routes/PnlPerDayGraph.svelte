@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import type { PnlPerDay } from '$lib/server/db/trades';
 
 	export let pnlPerDay: PnlPerDay[];
@@ -121,7 +122,6 @@
 						usePointStyle: true,
 						callbacks: {
 							title: function (tooltipItem) {
-								console.log(tooltipItem);
 								return format((tooltipItem[0] as { raw: { x: Date } }).raw.x, 'MMM d, yyyy');
 							}
 						}
@@ -132,6 +132,31 @@
 							color: 'rgba(200,200,200,0.9)'
 						}
 					}
+				},
+				onClick: (e) => {
+					if (!chart) {
+						return;
+					}
+					console.log(e);
+					const points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+
+					if (points.length) {
+						const firstPoint = points[0];
+						const value = chart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index];
+						// @ts-ignore
+						if (!value || !value.x || typeof value.x !== 'object') {
+							return;
+						}
+						const date = format(
+							// @ts-ignore
+							chart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index].x,
+							'yyyy-MM-dd'
+						);
+						goto(`/daily?date=${date}`);
+					}
+				},
+				interaction: {
+					mode: 'x'
 				}
 			}
 		});
@@ -142,7 +167,7 @@
 			const dateSplit = p._id.split('-');
 			return {
 				x: new Date(parseInt(dateSplit[0]), parseInt(dateSplit[1]) - 1, parseInt(dateSplit[2])),
-				y: p.pnl
+				y: p.netPnl
 			};
 		});
 

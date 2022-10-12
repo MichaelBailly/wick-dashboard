@@ -74,8 +74,8 @@
 		<h1>
 			{toHuman(date)}
 			<small>
-				<Button href="/?date={yesterday}">{yesterday}</Button>
-				<Button href="/?date={tomorrow}">{tomorrow}</Button>
+				<Button href="/daily?date={yesterday}">{yesterday}</Button>
+				<Button href="/daily?date={tomorrow}">{tomorrow}</Button>
 			</small>
 		</h1>
 		<div class="summary-container">
