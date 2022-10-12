@@ -81,6 +81,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>History for {$page.params.type} {$page.params.config}</title>
+</svelte:head>
+
 <h2>{$page.params.type} {$page.params.config}</h2>
 
 <h3>

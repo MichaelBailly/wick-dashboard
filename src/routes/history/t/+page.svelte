@@ -61,6 +61,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>History per Type - Overiew</title>
+</svelte:head>
+
 <div class="head-container">
 	<h1>
 		{period}

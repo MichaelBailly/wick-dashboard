@@ -152,7 +152,9 @@ export async function getPnlPerDay(opts: TradeTimeRangeOpts = {}): Promise<PnlPe
 
 	const pipeline = [
 		{
-			$match: query,
+			$match: query
+		},
+		{
 			$addFields: {
 				netPnl: {
 					$subtract: [
@@ -173,7 +175,7 @@ export async function getPnlPerDay(opts: TradeTimeRangeOpts = {}): Promise<PnlPe
 				_id: '$boughtMonth',
 				netPnl: { $sum: '$netPnl' },
 				pnl: { $sum: '$pnl' },
-				docs: { $sum: 1 }
+				tradeCount: { $sum: 1 }
 			}
 		},
 		{

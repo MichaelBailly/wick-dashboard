@@ -62,6 +62,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>History per volume - overview</title>
+</svelte:head>
+
 <div class="head-container">
 	<h1>
 		{period}
