@@ -3,6 +3,7 @@ import { ensureReferencesAreLoaded, toDashboardTrade } from '$lib/server/dashboa
 import { getTrades } from '$lib/server/db/trades';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import { add, format } from 'date-fns';
+import { getTypeHistorySummaries } from './_helper';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ url }: { url: URL }) {
@@ -19,6 +20,6 @@ export async function load({ url }: { url: URL }) {
 
 	return {
 		period: realPeriod,
-		trades: dashboardTrades
+		typeHistorySummaries: getTypeHistorySummaries(dashboardTrades)
 	};
 }

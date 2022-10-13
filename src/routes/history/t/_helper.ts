@@ -1,78 +1,36 @@
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
-import { format } from 'date-fns';
+import type { TypeHistorySummary } from '$lib/types/TypeHistorySummary';
 
-export type PerTradeTypeResponseInternal = {
-	// trade type
-	[key: string]: {
-		watcher: {
-			type: string;
-			config: string;
-		};
-		pnl: number;
-		tradeCount: number;
-		history: {
-			date: string;
-			pnl: number;
-			trades: DashboardTrade[];
-		}[];
-	};
-};
-
-export type PerTradeTypeResponse = {
-	type: string;
-	watcher: {
-		type: string;
-		config: string;
-	};
-	pnl: number;
-	tradeCount: number;
-	pnlPerTrade: number;
-	history: {
-		date: string;
-		pnl: number;
-		trades: DashboardTrade[];
-	}[];
-};
-
-export function perTradeType(trades: DashboardTrade[]): PerTradeTypeResponse[] {
-	const perTradeType: PerTradeTypeResponseInternal = {};
+export function getTypeHistorySummaries(trades: DashboardTrade[]): TypeHistorySummary[] {
+	const result: TypeHistorySummary[] = [];
 	for (const trade of trades) {
-		const date = format(trade.boughtTimestamp, 'yyyy-MM-dd');
-		const tradeType = `${trade.watcher.type} ${trade.watcher.config}`;
-		if (!perTradeType[tradeType]) {
-			perTradeType[tradeType] = {
-				watcher: trade.watcher,
-				pnl: 0,
+		let historySummary = result.find(
+			(s) => s.watcher.type === trade.watcher.type && s.watcher.config === trade.watcher.config
+		);
+		if (!historySummary) {
+			historySummary = {
+				watcher: { ...trade.watcher },
+				netPnl: 0,
 				tradeCount: 0,
-				history: []
+				volumeFamilies: []
 			};
+			result.push(historySummary);
 		}
-		perTradeType[tradeType].pnl += trade.netPnl;
-		perTradeType[tradeType].tradeCount++;
-		let dayData = perTradeType[tradeType].history.find((d) => d.date === date);
-		if (!dayData) {
-			dayData = {
-				date,
-				pnl: 0,
-				trades: []
+		historySummary.netPnl += trade.netPnl;
+		historySummary.tradeCount++;
+		let volumeFamily = historySummary.volumeFamilies.find(
+			(f) => f.volumeFamily === trade.volumeFamily
+		);
+		if (!volumeFamily) {
+			volumeFamily = {
+				volumeFamily: trade.volumeFamily,
+				netPnl: 0,
+				tradeCount: 0
 			};
-			perTradeType[tradeType].history.push(dayData);
+			historySummary.volumeFamilies.push(volumeFamily);
 		}
-		dayData.pnl += trade.netPnl;
-		dayData.trades.push(trade);
+		volumeFamily.netPnl += trade.netPnl;
+		volumeFamily.tradeCount++;
 	}
-
-	const result: PerTradeTypeResponse[] = [];
-
-	Object.keys(perTradeType).forEach((key) => {
-		result.push({
-			type: key,
-			watcher: perTradeType[key].watcher,
-			pnl: perTradeType[key].pnl,
-			tradeCount: perTradeType[key].tradeCount,
-			pnlPerTrade: perTradeType[key].pnl / perTradeType[key].tradeCount,
-			history: perTradeType[key].history
-		});
-	});
 	return result;
 }

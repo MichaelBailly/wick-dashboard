@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { parseMonthStringOrNow } from '$lib/dates';
-	import type { DashboardTrade } from '$lib/types/DashboardTrade';
+	import type { TypeHistorySummary } from '$lib/types/TypeHistorySummary';
+	import { getFamilyLabel } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import Accordion, { Content, Header, Panel } from '@smui-extra/accordion';
 	import Button, { Label } from '@smui/button';
@@ -9,15 +10,12 @@
 	import Paper from '@smui/paper';
 	import Switch from '@smui/switch';
 	import { add, format } from 'date-fns';
-	import VolumeSuccessRate from './VolumeSuccessRate.svelte';
-	import { perTradeType, type PerTradeTypeResponse } from './_helper';
 
 	/** @type {import('./$types').PageData} */
-	export let data: { trades: DashboardTrade[]; period: string };
-	console.log(data.trades);
+	export let data: { typeHistorySummaries: TypeHistorySummary[]; period: string };
 	let panelOpened: Record<string, boolean> = {};
 
-	let history: PerTradeTypeResponse[] = [];
+	let history: TypeHistorySummary[] = [];
 	let showNegativePnL = false;
 
 	let period: string = '';
@@ -44,19 +42,16 @@
 		//
 		// results formatting
 		//
-		history = perTradeType(data.trades);
+		history = [...data.typeHistorySummaries];
 
 		if (pnlPerTrade) {
-			history = history.sort((a, b) => b.pnlPerTrade - a.pnlPerTrade);
-			if (!showNegativePnL) {
-				history = history.filter((h) => h.pnlPerTrade > 0);
-			}
+			history = history.sort((a, b) => b.netPnl / b.tradeCount - a.netPnl / a.tradeCount);
 		} else {
 			// sort hitory by pnl, highest first
-			history = history.sort((a, b) => b.pnl - a.pnl);
-			if (!showNegativePnL) {
-				history = history.filter((h) => h.pnl > 0);
-			}
+			history = history.sort((a, b) => b.netPnl - a.netPnl);
+		}
+		if (!showNegativePnL) {
+			history = history.filter((h) => h.netPnl > 0);
 		}
 	}
 </script>
@@ -93,25 +88,44 @@
 
 <Paper>
 	<Accordion multiple>
-		{#each history as type}
-			<Panel bind:open={panelOpened[type.type]}>
+		{#each history as typeHistorySummary}
+			<Panel
+				bind:open={panelOpened[
+					`${typeHistorySummary.watcher.type} ${typeHistorySummary.watcher.config}`
+				]}>
 				<Header>
 					{#if pnlPerTrade}
-						<span> $<Pnl pnl={type.pnlPerTrade} /> per trade</span>
+						<span>
+							$<Pnl pnl={typeHistorySummary.netPnl / typeHistorySummary.tradeCount} /> per trade</span>
 					{:else}
-						<span> $<Pnl pnl={type.pnl} /> - {type.tradeCount} trades</span>
+						<span>
+							$<Pnl pnl={typeHistorySummary.netPnl} /> - {typeHistorySummary.tradeCount} trades</span>
 					{/if}
 					<span slot="description" class="primary"
-						>{type.type}
-						<a href="/history/t/{type.watcher.type}/{type.watcher.config}">more...</a></span>
+						>{typeHistorySummary.watcher.type}
+						{typeHistorySummary.watcher.config}
+						<a
+							href="/history/t/{typeHistorySummary.watcher.type}/{typeHistorySummary.watcher
+								.config}">more...</a
+						></span>
 
-					<IconButton slot="icon" toggle pressed={panelOpened[type.type]}>
+					<IconButton
+						slot="icon"
+						toggle
+						pressed={panelOpened[
+							`${typeHistorySummary.watcher.type} ${typeHistorySummary.watcher.config}`
+						]}>
 						<Icon class="material-icons" on>expand_less</Icon>
 						<Icon class="material-icons">expand_more</Icon>
 					</IconButton>
 				</Header>
 				<Content>
-					<VolumeSuccessRate {type} />
+					{#each typeHistorySummary.volumeFamilies as volumeFamily}
+						<div>
+							{getFamilyLabel(volumeFamily.volumeFamily)}:
+							<Pnl pnl={volumeFamily.netPnl} /> in {volumeFamily.tradeCount} trades
+						</div>
+					{/each}
 				</Content>
 			</Panel>
 		{/each}
