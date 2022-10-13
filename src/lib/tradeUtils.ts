@@ -1,6 +1,13 @@
-import { FEE_PER_TRADE } from './constants.client';
 import type { TradeRecordClient } from './types/TradeRecordClient';
 
+export const FEE_SELL = 0.00075;
+export const FEE_BUY = 0.00075;
+
 export function getNetPnl(trade: TradeRecordClient) {
-	return trade.pnl - FEE_PER_TRADE;
+	return (
+		trade.soldAmount * trade.soldPrice -
+		trade.quoteAmount -
+		trade.soldAmount * trade.soldPrice * FEE_SELL -
+		trade.quoteAmount * FEE_BUY
+	);
 }

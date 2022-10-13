@@ -1,3 +1,4 @@
+import { FEE_BUY, FEE_SELL } from '$lib/tradeUtils';
 import { isPnlPerType, type PnlPerType } from '$lib/types/PnlPerType';
 import { sub } from 'date-fns';
 import type { TradeRecordClient } from 'src/lib/types/TradeRecordClient';
@@ -161,8 +162,8 @@ export async function getPnlPerDay(opts: TradeTimeRangeOpts = {}): Promise<PnlPe
 						{ $subtract: [{ $multiply: ['$soldAmount', '$soldPrice'] }, '$quoteAmount'] },
 						{
 							$add: [
-								{ $multiply: ['$quoteAmount', 0.00075] },
-								{ $multiply: ['$soldAmount', '$soldPrice', 0.00075] }
+								{ $multiply: ['$quoteAmount', FEE_BUY] },
+								{ $multiply: ['$soldAmount', '$soldPrice', FEE_SELL] }
 							]
 						}
 					]
