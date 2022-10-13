@@ -3,6 +3,7 @@ import { ensureReferencesAreLoaded, toDashboardTrade } from '$lib/server/dashboa
 import { getTradePnl, getTrades } from '$lib/server/db/trades';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import { add, format } from 'date-fns';
+import { computePnlPerVolume } from './helpers';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ url }: { url: URL }) {
@@ -20,7 +21,7 @@ export async function load({ url }: { url: URL }) {
 
 	return {
 		period: realPeriod,
-		trades: dashboardTrades,
+		pnlPerVol: computePnlPerVolume(dashboardTrades),
 		pnlPerType
 	};
 }

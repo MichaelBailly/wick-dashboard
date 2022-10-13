@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { parseMonthStringOrNow } from '$lib/dates';
-	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import type { PnlPerType } from '$lib/types/PnlPerType';
 	import { getFamilyLabel } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
@@ -10,10 +9,10 @@
 	import Paper from '@smui/paper';
 	import Switch from '@smui/switch';
 	import { add, format } from 'date-fns';
-	import { computePnlPerType, computePnlPerVolume, type PnlPerVol } from './helpers';
+	import { computePnlPerType, type PnlPerVol } from './helpers';
 
 	/** @type {import('./$types').PageData} */
-	export let data: { trades: DashboardTrade[]; period: string; pnlPerType: PnlPerType[] };
+	export let data: { pnlPerVol: PnlPerVol[]; period: string; pnlPerType: PnlPerType[] };
 
 	let period: string = '';
 
@@ -41,7 +40,7 @@
 		};
 
 		// results formatting
-		pnlPerVol = computePnlPerVolume(data.trades);
+		pnlPerVol = data.pnlPerVol;
 		pnlPerType = computePnlPerType(data.pnlPerType, showNegativePnL);
 	}
 </script>
