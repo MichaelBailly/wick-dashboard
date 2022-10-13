@@ -11,7 +11,7 @@ export type PnlPerTypePerVolumeFamily = {
 	};
 };
 
-export function computePerTypePerVolumeFamily(trades: DashboardTrade[], showNegativePnL: boolean) {
+export function computePerTypePerVolumeFamily(trades: DashboardTrade[]) {
 	let pnlPerTypePerVolumeFamily: PnlPerTypePerVolumeFamily[] = [];
 	trades.forEach((t) => {
 		const family = t.volumeFamily;
@@ -34,12 +34,10 @@ export function computePerTypePerVolumeFamily(trades: DashboardTrade[], showNega
 		pptpvf.pnl += t.netPnl;
 		pptpvf.tradeCount += 1;
 	});
-	pnlPerTypePerVolumeFamily = pnlPerTypePerVolumeFamily
-		.filter((p) => ((showNegativePnL && p.pnl < 0) || p.pnl > 0 ? true : false))
-		.map((p) => ({
-			...p,
-			volumeFamily: getFamilyLabel(p.volumeFamily)
-		}));
+	pnlPerTypePerVolumeFamily = pnlPerTypePerVolumeFamily.map((p) => ({
+		...p,
+		volumeFamily: getFamilyLabel(p.volumeFamily)
+	}));
 	pnlPerTypePerVolumeFamily.sort((a, b) => b.pnl - a.pnl);
 	return pnlPerTypePerVolumeFamily;
 }

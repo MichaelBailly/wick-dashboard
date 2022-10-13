@@ -3,6 +3,7 @@ import { getTrades } from '$lib/server/db/trades';
 import { getNetPnl } from '$lib/tradeUtils';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import { add, format } from 'date-fns';
+import { computeBestGroupPerType, computePerTypePerVolumeFamily } from './helper';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ url }: { url: URL }) {
@@ -18,8 +19,12 @@ export async function load({ url }: { url: URL }) {
 		netPnl: getNetPnl(trade)
 	}));
 
+	const bestGroupPerType = computeBestGroupPerType(dashboardTrades);
+	const pnlPerType = computePerTypePerVolumeFamily(dashboardTrades);
+
 	return {
-		period: realPeriod,
-		trades: dashboardTrades
+		pnlPerType,
+		bestGroupPerType,
+		period: realPeriod
 	};
 }

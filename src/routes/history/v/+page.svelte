@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { parseMonthStringOrNow } from '$lib/dates';
-	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import Button, { Icon } from '@smui/button';
 	import DataTable, { Body, Cell, Head, Label, Row } from '@smui/data-table';
@@ -10,15 +9,14 @@
 	import Tab from '@smui/tab';
 	import TabBar from '@smui/tab-bar';
 	import { add, format } from 'date-fns';
-	import {
-		computeBestGroupPerType,
-		computePerTypePerVolumeFamily,
-		type BestGroup,
-		type PnlPerTypePerVolumeFamily
-	} from './helper';
+	import type { BestGroup, PnlPerTypePerVolumeFamily } from './helper';
 
 	/** @type {import('./$types').PageData} */
-	export let data: { trades: DashboardTrade[]; period: string };
+	export let data: {
+		pnlPerType: PnlPerTypePerVolumeFamily[];
+		bestGroupPerType: BestGroup[];
+		period: string;
+	};
 
 	let period: string = '';
 
@@ -32,7 +30,6 @@
 		['combination', 'Best family combination per type']
 	]);
 	let pnlPerTypePerVolumeFamily: PnlPerTypePerVolumeFamily[] = [];
-
 	let bestGroupPerType: BestGroup[] = [];
 
 	$: {
@@ -54,11 +51,13 @@
 		// compute data
 		// pnl per trade type per volume family
 
-		pnlPerTypePerVolumeFamily = computePerTypePerVolumeFamily(data.trades, showNegativePnL);
+		pnlPerTypePerVolumeFamily = showNegativePnL
+			? [...data.pnlPerType]
+			: data.pnlPerType.filter((p) => p.pnl > 0);
 
 		// compute
 		// best group of families per type
-		bestGroupPerType = computeBestGroupPerType(data.trades);
+		bestGroupPerType = [...data.bestGroupPerType];
 	}
 </script>
 
