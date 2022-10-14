@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { loadReference } from '$lib/volumeReference';
 	import '@fontsource/roboto-mono';
 	import '@fontsource/roboto/300.css';
 	import '@fontsource/roboto/400.css';
@@ -8,11 +7,6 @@
 	import Drawer, { AppContent, Content } from '@smui/drawer';
 	import List, { Item, Text } from '@smui/list';
 	import 'material-icons/iconfont/material-icons.css';
-
-	/** @type {import('./$types').LayoutData} */
-	export let data;
-
-	loadReference(data.volumeReference);
 </script>
 
 <div class="page-container">
