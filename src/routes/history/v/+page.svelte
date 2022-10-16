@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { parseMonthStringOrNow } from '$lib/dates';
+	import MoreLink from '$lib/widgets/MoreLink.svelte';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import Button, { Icon } from '@smui/button';
 	import DataTable, { Body, Cell, Head, Label, Row } from '@smui/data-table';
@@ -110,11 +111,10 @@
 						<Cell>{pptpvf.watcher.type} {pptpvf.watcher.config}</Cell>
 						<Cell><Pnl pnl={pptpvf.pnl} /></Cell>
 						<Cell>{pptpvf.tradeCount}</Cell>
-						<Cell
-							><a
-								href="/history/t/{pptpvf.watcher.type}/{pptpvf.watcher.config}?period={data.period}"
-								>details</a
-							></Cell>
+						<Cell>
+							<MoreLink
+								href="/history/t/{pptpvf.watcher.type}/{pptpvf.watcher
+									.config}?period={data.period}" /></Cell>
 					</Row>
 				{/each}
 			</Body>
@@ -135,10 +135,10 @@
 						<Cell>{best.families.join(', ')}</Cell>
 						<Cell>{best.watcher.type} {best.watcher.config}</Cell>
 						<Cell><Pnl pnl={best.pnl} /></Cell>
-						<Cell
-							><a href="/history/t/{best.watcher.type}/{best.watcher.config}?period={data.period}"
-								>details</a
-							></Cell>
+						<Cell>
+							<MoreLink
+								href="/history/t/{best.watcher.type}/{best.watcher
+									.config}?period={data.period}" /></Cell>
 					</Row>
 				{/each}
 			</Body>

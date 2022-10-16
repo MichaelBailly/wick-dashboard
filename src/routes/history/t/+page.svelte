@@ -2,6 +2,7 @@
 	import { parseMonthStringOrNow } from '$lib/dates';
 	import type { TypeHistorySummary } from '$lib/types/TypeHistorySummary';
 	import { getFamilyLabel } from '$lib/volumeReference';
+	import MoreLink from '$lib/widgets/MoreLink.svelte';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import Accordion, { Content, Header, Panel } from '@smui-extra/accordion';
 	import Button, { Label } from '@smui/button';
@@ -104,10 +105,9 @@
 					<span slot="description" class="primary"
 						>{typeHistorySummary.watcher.type}
 						{typeHistorySummary.watcher.config}
-						<a
+						<MoreLink
 							href="/history/t/{typeHistorySummary.watcher.type}/{typeHistorySummary.watcher
-								.config}">more...</a
-						></span>
+								.config}" /></span>
 
 					<IconButton
 						slot="icon"

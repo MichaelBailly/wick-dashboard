@@ -20,7 +20,7 @@
 	let todaysPnl: number;
 	let todaysNetPnl: number;
 	let todaysFees: number;
-	let todaysPnlPerWatcher: { type: string; config: string; pnl: number; count: number }[] = [];
+	let todaysPnlPerWatcher: { type: string; config: string; netPnl: number; count: number }[] = [];
 
 	$: {
 		todaysPnlPerWatcher = [];
@@ -45,19 +45,19 @@
 				(w) => w.type === t.watcher.type && w.config === t.watcher.config
 			);
 			if (watcher) {
-				watcher.pnl += t.pnl;
+				watcher.netPnl += t.netPnl;
 				watcher.count++;
 			} else {
 				todaysPnlPerWatcher.push({
 					type: t.watcher.type,
 					config: t.watcher.config,
-					pnl: t.pnl,
+					netPnl: t.netPnl,
 					count: 1
 				});
 			}
 		}
 		// sort by pnl
-		todaysPnlPerWatcher.sort((a, b) => b.pnl - a.pnl);
+		todaysPnlPerWatcher.sort((a, b) => b.netPnl - a.netPnl);
 	}
 
 	function toHuman(date: Date | number) {
@@ -94,7 +94,7 @@
 				{#each todaysPnlPerWatcher as w}
 					<div>
 						{w.type}
-						{w.config}: <Pnl pnl={w.pnl} />
+						{w.config}: <Pnl pnl={w.netPnl} />
 						({w.count} trades) <a href="/history/t/{w.type}/{w.config}">more...</a>
 					</div>
 				{/each}

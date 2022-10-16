@@ -5,6 +5,7 @@
 	import LinearProgress from '@smui/linear-progress';
 	import Paper from '@smui/paper';
 	import { onMount } from 'svelte';
+	import MoreLink from './MoreLink.svelte';
 	import Pnl from './Pnl.svelte';
 
 	export let months: number = 2;
@@ -85,10 +86,9 @@
 			{#each composedData as family}
 				<Row>
 					<Cell>
-						<a href="/history/t/{family.watcher.type}/{family.watcher.config}">
-							{family.watcher.type}
-							{family.watcher.config}
-						</a>
+						{family.watcher.type}
+						{family.watcher.config}
+						<MoreLink href="/history/t/{family.watcher.type}/{family.watcher.config}" />
 					</Cell>
 					<Cell>
 						{family.families.map((f) => getFamilyLabel(f)).join(', ')}

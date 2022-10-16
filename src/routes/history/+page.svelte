@@ -2,6 +2,7 @@
 	import { parseMonthStringOrNow } from '$lib/dates';
 	import type { PnlPerType } from '$lib/types/PnlPerType';
 	import { getFamilyLabel } from '$lib/volumeReference';
+	import MoreLink from '$lib/widgets/MoreLink.svelte';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import Button, { Icon } from '@smui/button';
 	import DataTable, { Body, Cell, Head, Label, Row } from '@smui/data-table';
@@ -66,7 +67,7 @@
 </div>
 
 <Paper>
-	<h3>PnL per volume family <small><a href="/history/v">More...</a></small></h3>
+	<h3>PnL per volume family <MoreLink href="/history/v" /></h3>
 	<DataTable style="width: 100%;">
 		<Head>
 			<Row>
@@ -104,7 +105,7 @@
 		</Body>
 	</DataTable>
 </Paper><br /><Paper>
-	<h3>PnL per watcher type <small><a href="/history/t">More...</a></small></h3>
+	<h3>PnL per watcher type <MoreLink href="/history/t" /></h3>
 	<FormField align="end">
 		<Switch bind:checked={showNegativePnL} />
 		<span slot="label">Show negative PnL</span>
