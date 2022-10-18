@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { DashboardTrade } from '$lib/types/DashboardTrade';
+	import { getFamilyLabel } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import DataTable, { Body, Cell, Head, Label, Row } from '@smui/data-table';
 	import { format, formatDistance } from 'date-fns';
+	import MoreLink from './MoreLink.svelte';
 
 	export let trades: DashboardTrade[];
 </script>
@@ -11,13 +13,13 @@
 	<Head>
 		<Row>
 			<Cell columnId="setupType">
-				<Label>Setup</Label>
-			</Cell>
-			<Cell columnId="setupConfig">
-				<Label>Config</Label>
+				<Label>Type</Label>
 			</Cell>
 			<Cell columnId="pair">
 				<Label>Pair</Label>
+			</Cell>
+			<Cell columnId="pair">
+				<Label>Volume Family</Label>
 			</Cell>
 			<Cell columnId="boughtTimestamp">
 				<Label>Trade Start</Label>
@@ -41,12 +43,14 @@
 			<Row>
 				<Cell>
 					{t.watcher.type}
-				</Cell>
-				<Cell>
 					{t.watcher.config}
+					<MoreLink href="/history/t/{t.watcher.type}/{t.watcher.config}" />
 				</Cell>
 				<Cell>
 					{t.pair}
+				</Cell>
+				<Cell>
+					{getFamilyLabel(t.volumeFamily)}
 				</Cell>
 				<Cell>
 					{format(t.boughtTimestamp, 'yy, EEE MMM d HH:mm')}
