@@ -7,7 +7,9 @@
 
 	let sortedTrades: TradeRecordClient[] = [];
 
-	$: sortedTrades = trades.sort((a, b) => b.soldTimestamp.getTime() - a.boughtTimestamp.getTime());
+	$: sortedTrades = trades.sort(
+		(a, b) => b.boughtTimestamp.getTime() - a.boughtTimestamp.getTime()
+	);
 </script>
 
 <DataTable table$aria-label="Trades list" style="max-width: 100%;">
