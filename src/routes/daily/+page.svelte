@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import type { DashboardTrade } from '$lib/types/DashboardTrade';
+	import { VolumeFamilies } from '$lib/volumeReference';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import TradesTable from '$lib/widgets/TradesTable.svelte';
 	import Accordion, { Content as AContent, Header, Panel } from '@smui-extra/accordion';
 	import Button from '@smui/button';
+	import Checkbox from '@smui/checkbox';
+	import FormField from '@smui/form-field';
 	import IconButton, { Icon } from '@smui/icon-button';
 	import Paper, { Content } from '@smui/paper';
 	import { add, format } from 'date-fns';
@@ -22,6 +25,11 @@
 	let todaysFees: number;
 	let todaysPnlPerWatcher: { type: string; config: string; netPnl: number; count: number }[] = [];
 
+	const checked: Record<string, boolean> = {};
+	for (const family of VolumeFamilies) {
+		checked[family.name] = true;
+	}
+
 	$: {
 		todaysPnlPerWatcher = [];
 		const dateStr = $page.url.searchParams.get('date');
@@ -36,7 +44,7 @@
 		yesterday = format(add(date, { days: -1 }), 'yyyy-MM-dd');
 		tomorrow = format(add(date, { days: 1 }), 'yyyy-MM-dd');
 
-		todaysTrades = data.trades;
+		todaysTrades = data.trades.filter((t) => checked[t.volumeFamily]);
 		todaysTrades.sort((a, b) => b.boughtTimestamp.getTime() - a.boughtTimestamp.getTime());
 		todaysPnl = todaysTrades.reduce((acc: number, t: DashboardTrade) => acc + t.pnl, 0);
 		todaysNetPnl = todaysTrades.reduce((acc: number, t: DashboardTrade) => acc + t.netPnl, 0);
@@ -89,6 +97,14 @@
 						<br />
 						{todaysTrades.length} trades
 					</small>
+				</div>
+				<div class="family-check-container">
+					{#each VolumeFamilies as family}
+						<FormField>
+							<Checkbox bind:checked={checked[family.name]} />
+							<span slot="label">{family.label}</span>
+						</FormField>
+					{/each}
 				</div>
 			</div>
 			<div class="summary-info">
@@ -156,5 +172,12 @@
 
 	.small {
 		font-size: 0.8rem;
+	}
+
+	.family-check-container {
+		display: flex;
+		flex-direction: column;
+		justify-content: start;
+		align-items: start;
 	}
 </style>
