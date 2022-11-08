@@ -10,10 +10,10 @@ export enum SORT {
 }
 
 export enum SORT_FIELD {
-	BUY,
-	BOUGHT,
-	SELL,
-	SOLD
+	BUY = 'buyTimestamp',
+	BOUGHT = 'boughtTimestamp',
+	SELL = 'sellTimestamp',
+	SOLD = 'soldTimestamp'
 }
 
 export type TradeTimeRangeOpts = {
@@ -71,10 +71,7 @@ export async function getTrades(opts: GetTradesOpts = {}): Promise<TradeRecordCl
 		query.$and.push({ boughtTimestamp: { $lt: opts.end } });
 	}
 	const collection = await getTradeCollection();
-	const trades = await collection
-		.find(query)
-		.sort({ [sortField]: sort })
-		.toArray();
+	const trades = await collection.find(query).toArray();
 
 	const clientTrades = trades.map((t) => ({
 		...t,
@@ -82,10 +79,22 @@ export async function getTrades(opts: GetTradesOpts = {}): Promise<TradeRecordCl
 	}));
 	const ok = clientTrades.every(isTradeRecordClient);
 	if (ok) {
-		return clientTrades;
+		return applySort(clientTrades, sort, sortField);
 	}
 
 	throw new Error('Unable to fettch trades');
+}
+
+function applySort(trades: TradeRecordClient[], sort: SORT, sortField: SORT_FIELD) {
+	return trades.sort((a, b) => {
+		if (a[sortField] < b[sortField]) {
+			return sort;
+		}
+		if (a[sortField] > b[sortField]) {
+			return -sort;
+		}
+		return 0;
+	});
 }
 
 function isTradeRecordClient(test: unknown): test is TradeRecordClient {
