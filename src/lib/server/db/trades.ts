@@ -52,6 +52,7 @@ type GetTradesMongoQuery = {
 } & TradeTimeRangeMongoQuery;
 
 export async function getTrades(opts: GetTradesOpts = {}): Promise<TradeRecordClient[]> {
+	const findOptions = { allowDiskUse: true };
 	const sort = opts?.sort || SORT.DESC;
 	const sortField = opts?.sortField || SORT_FIELD.BOUGHT;
 	const query: GetTradesMongoQuery = {};
@@ -72,7 +73,7 @@ export async function getTrades(opts: GetTradesOpts = {}): Promise<TradeRecordCl
 	}
 	const collection = await getTradeCollection();
 	const trades = await collection
-		.find(query)
+		.find(query, findOptions)
 		.sort({ [sortField]: sort })
 		.toArray();
 
