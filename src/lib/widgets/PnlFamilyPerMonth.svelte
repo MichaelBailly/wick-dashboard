@@ -93,8 +93,10 @@
 	async function loadData(monthLen: number) {
 		loaded = false;
 		const response = await fetch(`/api/volumeFamilyPnl?months=${monthLen}`);
-		families = await response.json();
-		loaded = true;
+		if (monthLen === months) {
+			families = await response.json();
+			loaded = true;
+		}
 	}
 
 	onMount(() => {
