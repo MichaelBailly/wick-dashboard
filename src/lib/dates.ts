@@ -33,3 +33,7 @@ export function parseMonthStringOrNow(period?: string | null): [number, number] 
 
 	return [year, month];
 }
+
+export function toMonthString(date: Date): string {
+	return format(date, 'yyyy-MM');
+}
