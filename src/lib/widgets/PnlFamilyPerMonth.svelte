@@ -35,66 +35,6 @@
 
 	$: if (mounted) loadData(months);
 	$: composedData = getComposedData([...families]);
-	/*
-	$: {
-		composedData = [];
-		if (families.length) {
-			const fam = families[0];
-			monthsData = fam.positiveNetPnls[0].details.map((d) => d.month);
-
-			for (const family of families) {
-				const perMonthPnl: number[] = [];
-				for (const posNetPnl of family.positiveNetPnls) {
-					posNetPnl.details.forEach((d, i) => {
-						perMonthPnl[i] = perMonthPnl[i] ? perMonthPnl[i] + d.netPnl : d.netPnl;
-					});
-				}
-				const composed = {
-					watcher: family.watcher,
-					families: family.positiveNetPnls.map((p) => p.volumeFamilyId),
-					netPnl: perMonthPnl,
-					positiveNetPnls: family.positiveNetPnls
-				};
-				composedData.push(composed);
-			}
-		}
-	}
-
-	function composeData(families: Family[]) {
-		const composedData: ComposedData[] = [];
-		if (!families.length) {
-			return composedData;
-		}
-		const fam = families[0];
-		monthsData = fam.positiveNetPnls[0].details.map((d) => d.month);
-
-		for (const family of families) {
-			const perMonthPnl: number[] = [];
-			for (const posNetPnl of family.positiveNetPnls) {
-				posNetPnl.details.forEach((d, i) => {
-					perMonthPnl[i] = perMonthPnl[i] ? perMonthPnl[i] + d.netPnl : d.netPnl;
-				});
-			}
-			const composed = {
-				watcher: family.watcher,
-				families: family.positiveNetPnls.map((p) => p.volumeFamilyId),
-				netPnl: perMonthPnl,
-				positiveNetPnls: family.positiveNetPnls
-			};
-			composedData.push(composed);
-		}
-		return composedData;
-	}
-
-	async function loadData(monthLen: number) {
-		loaded = false;
-		const response = await fetch(`/api/volumeFamilyPnl?months=${monthLen}`);
-		if (monthLen === months) {
-			families = await response.json();
-			loaded = true;
-		}
-	}
-*/
 
 	function getComposedData(fam: Families) {
 		const firstMonthData = fam.shift();
