@@ -51,7 +51,7 @@
 		</Row>
 	</Head>
 	<Body>
-		{#each trades as t}
+		{#each rows as t}
 			<Row>
 				<Cell>
 					{t.watcher.type}
