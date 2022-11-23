@@ -13,8 +13,10 @@ export async function ensureReferencesAreLoaded() {
 }
 
 export function toDashboardTrade(trade: TradeRecordClient): DashboardTrade {
+	const { details, ...result } = trade;
+
 	return {
-		...trade,
+		...result,
 		volumeFamily: trade.volumeFamily || getVolumeFamily(trade.pair),
 		netPnl: getNetPnl(trade)
 	};

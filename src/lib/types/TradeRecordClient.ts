@@ -20,4 +20,9 @@ export type TradeRecordClient = {
 		type: string;
 		config: string;
 	};
+	details: {
+		simulation: unknown;
+		buyTransaction: unknown;
+		sellTransaction: unknown;
+	};
 };
