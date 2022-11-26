@@ -4,6 +4,7 @@ import { getTrades, type TradeHistoryOpts } from '$lib/server/db/trades';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import type { HistoryTypeLoadArgs } from '$lib/types/HistoryTypeLoadArgs';
 import { add } from 'date-fns';
+import { parseComposedPeriod } from './helpers';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ url, params }: HistoryTypeLoadArgs) {
@@ -24,9 +25,15 @@ export async function load({ url, params }: HistoryTypeLoadArgs) {
 		start = getAtMidnightUTC(year, month, 1);
 		end = add(start, { months: 1 });
 	} else {
-		// last30days
-		start = getTodayAtMidnightUTC();
-		start = add(start, { days: -30 });
+		const composed = parseComposedPeriod(period);
+		if (composed) {
+			start = composed.dates.start;
+			end = composed.dates.end;
+		} else {
+			// last30days
+			start = getTodayAtMidnightUTC();
+			start = add(start, { days: -30 });
+		}
 	}
 
 	const opts: TradeHistoryOpts = { type: params.type, config: params.config, start, end };
