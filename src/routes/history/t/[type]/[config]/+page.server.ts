@@ -1,9 +1,9 @@
-import { getAtMidnightUTC, getTodayAtMidnightUTC } from '$lib/dates';
+import { getAtMidnightUTC, getDateAtMidnightUTC, getTodayAtMidnightUTC } from '$lib/dates';
 import { ensureReferencesAreLoaded, toDashboardTrade } from '$lib/server/dashboardTradeConverter';
 import { getTrades, type TradeHistoryOpts } from '$lib/server/db/trades';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import type { HistoryTypeLoadArgs } from '$lib/types/HistoryTypeLoadArgs';
-import { add } from 'date-fns';
+import { add, startOfMonth } from 'date-fns';
 import { parseComposedPeriod } from './helpers';
 
 /** @type {import('./$types').PageServerLoad} */
@@ -30,9 +30,9 @@ export async function load({ url, params }: HistoryTypeLoadArgs) {
 			start = composed.dates.start;
 			end = composed.dates.end;
 		} else {
-			// last30days
+			// this month
 			start = getTodayAtMidnightUTC();
-			start = add(start, { days: -30 });
+			start = getDateAtMidnightUTC(startOfMonth(start));
 		}
 	}
 
@@ -41,12 +41,11 @@ export async function load({ url, params }: HistoryTypeLoadArgs) {
 	const opts1: TradeHistoryOpts = { type: params.type, config: params.config, start, end: middle };
 	const opts2: TradeHistoryOpts = { type: params.type, config: params.config, start: middle, end };
 
-	const promiseResponse = await Promise.all([
-		getTrades(opts1),
-		getTrades(opts2),
-		ensureReferencesAreLoaded()
-	]);
-	const trades = promiseResponse[0].concat(promiseResponse[1]);
+	const trades = await getTradesSplit(start, end || new Date(), 4, {
+		type: params.type,
+		config: params.config
+	});
+	await ensureReferencesAreLoaded();
 	const dbTrades: DashboardTrade[] = trades.map(toDashboardTrade);
 
 	return {
@@ -56,6 +55,27 @@ export async function load({ url, params }: HistoryTypeLoadArgs) {
 
 function findMiddleDate(start: Date, end: Date): Date {
 	const diff = end.getTime() - start.getTime();
-	const half = diff / 2;
+	const half = Math.round(diff / 2);
 	return new Date(start.getTime() + half);
+}
+
+async function getTradesSplit(
+	start: Date,
+	end: Date,
+	split: number,
+	baseArgs: TradeHistoryOpts = {}
+) {
+	const diff = end.getTime() - start.getTime();
+	const increment = Math.round(diff / split);
+
+	const opts = [];
+	for (let i = 0; i < split; i++) {
+		const startInterval = new Date(end.getTime() - increment * (i + 1));
+		const endInterval = new Date(end.getTime() - increment * i);
+		opts.push(getTrades({ ...baseArgs, start: startInterval, end: endInterval }));
+	}
+
+	const promiseResponse = await Promise.all(opts);
+	const trades = promiseResponse.reduce((acc, v) => acc.concat(v), []);
+	return trades;
 }
