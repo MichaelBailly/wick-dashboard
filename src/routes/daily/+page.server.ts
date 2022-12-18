@@ -21,7 +21,12 @@ export async function load({ url }: ServerLoadEvent) {
 		start = getAtMidnightUTC(year, month, day);
 		end = add(start, { days: 1 });
 	}
-	const trades = await getTrades({ start, end });
+	const midDay = add(start, { hours: 12 });
+	const promiseResponse = await Promise.all([
+		getTrades({ start, end: midDay }),
+		getTrades({ start: midDay, end })
+	]);
+	const trades = promiseResponse[0].concat(promiseResponse[1]);
 
 	await ensureReferencesAreLoaded();
 
