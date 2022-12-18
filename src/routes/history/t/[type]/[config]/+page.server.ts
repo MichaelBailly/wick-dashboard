@@ -36,14 +36,26 @@ export async function load({ url, params }: HistoryTypeLoadArgs) {
 		}
 	}
 
-	const opts: TradeHistoryOpts = { type: params.type, config: params.config, start, end };
+	const middle = findMiddleDate(start, end || new Date());
 
-	const trades = await getTrades(opts);
-	await ensureReferencesAreLoaded();
+	const opts1: TradeHistoryOpts = { type: params.type, config: params.config, start, end: middle };
+	const opts2: TradeHistoryOpts = { type: params.type, config: params.config, start: middle, end };
 
+	const promiseResponse = await Promise.all([
+		getTrades(opts1),
+		getTrades(opts2),
+		ensureReferencesAreLoaded()
+	]);
+	const trades = promiseResponse[0].concat(promiseResponse[1]);
 	const dbTrades: DashboardTrade[] = trades.map(toDashboardTrade);
 
 	return {
 		trades: dbTrades
 	};
+}
+
+function findMiddleDate(start: Date, end: Date): Date {
+	const diff = end.getTime() - start.getTime();
+	const half = diff / 2;
+	return new Date(start.getTime() + half);
 }
