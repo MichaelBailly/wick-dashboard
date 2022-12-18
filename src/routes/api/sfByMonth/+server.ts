@@ -1,6 +1,6 @@
 import { getDateAtMidnightUTC, parseMonthStringOrNow } from '$lib/dates';
 import { ensureReferencesAreLoaded, toDashboardTrade } from '$lib/server/dashboardTradeConverter';
-import { getTrades } from '$lib/server/db/trades';
+import { getTradesParallel } from '$lib/server/getTradesParallel';
 import type { StrategyFamilyMonthPnl } from '$lib/types/StrategyFamilyMonthPnl';
 import { add, subMilliseconds } from 'date-fns';
 
@@ -15,7 +15,7 @@ export async function GET({ url }: { url: URL }) {
 
 	await ensureReferencesAreLoaded();
 
-	const trades = await getTrades({ start, end });
+	const trades = await getTradesParallel(start, end, 4);
 
 	const sfmyHash: { [key: string]: StrategyFamilyMonthPnl } = {};
 	for (const t of trades) {
