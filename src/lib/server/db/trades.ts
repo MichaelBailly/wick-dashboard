@@ -3,6 +3,7 @@ import { isPnlPerType, type PnlPerType } from '$lib/types/PnlPerType';
 import { sub } from 'date-fns';
 import type { TradeRecordClient } from 'src/lib/types/TradeRecordClient';
 import { getTradeCollection } from '.';
+import type { TradeTimeRangeOpts } from '../../types/TradeTimeRangeOpts';
 
 export enum SORT {
 	ASC = 1,
@@ -15,11 +16,6 @@ export enum SORT_FIELD {
 	SELL = 'sellTimestamp',
 	SOLD = 'soldTimestamp'
 }
-
-export type TradeTimeRangeOpts = {
-	start?: Date;
-	end?: Date;
-};
 
 type TradeTimeRangeMongoQuery = {
 	$and?: { boughtTimestamp: { $gte?: Date; $lt?: Date } }[];

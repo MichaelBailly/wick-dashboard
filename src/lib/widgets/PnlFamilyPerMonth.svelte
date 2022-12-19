@@ -84,9 +84,7 @@
 	function loadData(monthLen: number) {
 		loaded = false;
 		const monthlist = monthList(monthLen);
-		const promises = monthlist.map((m) =>
-			fetch(`/api/sfByMonth?month=${m}&noNegative=true`).then((r) => r.json())
-		);
+		const promises = monthlist.map((m) => fetch(`/api/sfByMonth?month=${m}`).then((r) => r.json()));
 
 		Promise.all(promises).then((responses) => {
 			if (monthLen === months) {
