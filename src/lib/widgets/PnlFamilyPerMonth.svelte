@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { toMonthString } from '$lib/dates';
 	import type { StrategyFamilyMonthPnl } from '$lib/types/StrategyFamilyMonthPnl';
+	import type { Watcher } from '$lib/types/Watcher';
 	import { getFamilyLabel } from '$lib/volumeReference';
 	import DataTable, { Body, Cell, Head, Label } from '@smui/data-table';
 	import Row from '@smui/data-table/src/Row.svelte';
@@ -15,10 +16,7 @@
 	export let months: number = 3;
 
 	type ComposedItem = {
-		watcher: {
-			type: string;
-			config: string;
-		};
+		watcher: Watcher;
 		families: string[];
 		netPnl: number[];
 	};

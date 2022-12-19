@@ -1,10 +1,8 @@
 import type { FamilyId } from '$lib/volumeReference';
+import type { Watcher } from './Watcher';
 
 export type TypeHistorySummary = {
-	watcher: {
-		type: string;
-		config: string;
-	};
+	watcher: Watcher;
 	netPnl: number;
 	tradeCount: number;
 	volumeFamilies: {

@@ -1,14 +1,12 @@
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
+import type { Watcher } from '$lib/types/Watcher';
 import { FamilyId, getFamilyLabel } from '$lib/volumeReference';
 
 export type PnlPerTypePerVolumeFamily = {
 	volumeFamily: string;
 	pnl: number;
 	tradeCount: number;
-	watcher: {
-		type: string;
-		config: string;
-	};
+	watcher: Watcher;
 };
 
 export function computePerTypePerVolumeFamily(trades: DashboardTrade[]) {
@@ -49,10 +47,7 @@ export type BestGroup = {
 	m: number;
 	l: number;
 	xl: number;
-	watcher: {
-		type: string;
-		config: string;
-	};
+	watcher: Watcher;
 	pnl: number;
 	families: string[];
 };

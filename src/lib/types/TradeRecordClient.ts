@@ -1,4 +1,5 @@
 import type { FamilyId } from '$lib/volumeReference';
+import type { Watcher } from './Watcher';
 
 export type TradeRecordClient = {
 	_id: string;
@@ -16,10 +17,7 @@ export type TradeRecordClient = {
 	soldAmount: number;
 	soldPrice: number;
 	pnl: number;
-	watcher: {
-		type: string;
-		config: string;
-	};
+	watcher: Watcher;
 	details: {
 		simulation: unknown;
 		buyTransaction: unknown;

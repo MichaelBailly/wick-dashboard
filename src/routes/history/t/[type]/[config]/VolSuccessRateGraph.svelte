@@ -106,8 +106,10 @@
 								}
 
 								return 'rgba(0, 131, 143, 0.35)';
-							},
-							drawBorder: false
+							}
+						},
+						border: {
+							display: false
 						}
 					}
 				},

@@ -106,7 +106,6 @@
 							color: 'rgb(196, 144, 0)'
 						},
 						grid: {
-							drawBorder: false,
 							color: function (context) {
 								if (context.tick.value !== 0) {
 									return 'rgba(30,30,30, 0.6)';
@@ -114,6 +113,9 @@
 
 								return 'rgba(196, 144, 0, 0.35)';
 							}
+						},
+						border: {
+							display: false
 						}
 					}
 				},

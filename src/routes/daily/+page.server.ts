@@ -1,6 +1,6 @@
 import { getAtMidnightUTC, getTodayAtMidnightUTC } from '$lib/dates';
 import { ensureReferencesAreLoaded, toDashboardTrade } from '$lib/server/dashboardTradeConverter';
-import { getTrades } from '$lib/server/db/trades';
+import { getTradesParallel } from '$lib/server/getTradesParallel';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import { error, type ServerLoadEvent } from '@sveltejs/kit';
 import { add } from 'date-fns';
@@ -21,12 +21,7 @@ export async function load({ url }: ServerLoadEvent) {
 		start = getAtMidnightUTC(year, month, day);
 		end = add(start, { days: 1 });
 	}
-	const midDay = add(start, { hours: 12 });
-	const promiseResponse = await Promise.all([
-		getTrades({ start, end: midDay }),
-		getTrades({ start: midDay, end })
-	]);
-	const trades = promiseResponse[0].concat(promiseResponse[1]);
+	const trades = await getTradesParallel(start, end, 2);
 
 	await ensureReferencesAreLoaded();
 
