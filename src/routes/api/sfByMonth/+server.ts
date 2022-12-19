@@ -6,7 +6,6 @@ import { add, subMilliseconds } from 'date-fns';
 /** @type {import('./$types').RequestHandler} */
 export async function GET({ url }: { url: URL }) {
 	const monthStr = url.searchParams.get('month');
-	const noNegative = url.searchParams.get('noNegative') === 'true';
 	const monthYear = parseMonthStringOrNow(monthStr);
 	const dateTemp = new Date(monthYear[0], monthYear[1] - 1, 1);
 	const start = getDateAtMidnightUTC(dateTemp);
