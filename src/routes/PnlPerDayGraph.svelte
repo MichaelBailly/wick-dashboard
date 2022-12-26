@@ -11,6 +11,7 @@
 		Chart,
 		Legend,
 		LinearScale,
+		LineController,
 		LineElement,
 		PointElement,
 		TimeScale,
@@ -24,6 +25,7 @@
 	import { onMount } from 'svelte';
 	let canvas: HTMLCanvasElement;
 	Chart.register(
+		LineController,
 		BarController,
 		BarElement,
 		CategoryScale,
@@ -40,15 +42,18 @@
 	Chart.defaults.color = 'rgba(200,200,200,0.9)';
 
 	let chart: Chart;
-	let { pnl } = getTradesGraphData(pnlPerDay);
+	let { pnl, cumulatedPnl } = getTradesGraphData(pnlPerDay);
 
 	$: {
 		if (chart) {
 			const out = getTradesGraphData(pnlPerDay);
 			pnl = out.pnl;
+			cumulatedPnl = out.cumulatedPnl;
 
 			// @ts-ignore
 			chart.data.datasets[0].data = pnl;
+			// @ts-ignore
+			chart.data.datasets[1].data = cumulatedPnl;
 
 			chart.update();
 		}
@@ -74,6 +79,18 @@
 						borderWidth: 2,
 						yAxisID: 'y2',
 						order: 2
+					},
+					{
+						type: 'line',
+						label: 'Cumulated Pnl',
+						data: cumulatedPnl,
+						backgroundColor: 'rgb(0, 131, 143)',
+						borderColor: 'rgba(0, 131, 143, 0.5)',
+						borderWidth: 2,
+						cubicInterpolationMode: 'monotone',
+						tension: 0.4,
+						yAxisID: 'y',
+						order: 1
 					}
 				]
 			},
@@ -112,6 +129,26 @@
 								}
 
 								return 'rgba(196, 144, 0, 0.35)';
+							}
+						},
+						border: {
+							display: false
+						}
+					},
+					y: {
+						type: 'linear',
+						display: true,
+						position: 'right',
+						ticks: {
+							color: 'rgb(0, 131, 143)'
+						},
+						grid: {
+							color: function (context) {
+								if (context.tick.value !== 0) {
+									return 'rgba(30,30,30, 0)';
+								}
+
+								return 'rgba(0, 131, 143, 0.35)';
 							}
 						},
 						border: {
@@ -163,16 +200,35 @@
 		});
 	});
 
-	function getTradesGraphData(pnlPerDay: PnlPerDay[]): { pnl: { x: Date; y: number }[] } {
+	function getTradesGraphData(pnlPerDay: PnlPerDay[]): {
+		cumulatedPnl: { x: Date; y: number }[];
+		pnl: { x: Date; y: number }[];
+	} {
+		let aggregatePnlValue = 0;
+		const cumulatedPnl: { x: Date; y: number }[] = [];
 		const pnl = pnlPerDay.map((p) => {
 			const dateSplit = p._id.split('-');
+			const date = new Date(
+				parseInt(dateSplit[0]),
+				parseInt(dateSplit[1]) - 1,
+				parseInt(dateSplit[2])
+			);
+
+			aggregatePnlValue += p.netPnl;
+
+			cumulatedPnl.push({
+				x: date,
+				y: aggregatePnlValue
+			});
+
 			return {
-				x: new Date(parseInt(dateSplit[0]), parseInt(dateSplit[1]) - 1, parseInt(dateSplit[2])),
+				x: date,
 				y: p.netPnl
 			};
 		});
 
 		return {
+			cumulatedPnl,
 			pnl
 		};
 	}
