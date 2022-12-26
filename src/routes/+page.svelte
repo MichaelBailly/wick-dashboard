@@ -21,18 +21,33 @@
 	<title>Overiew</title>
 </svelte:head>
 
-<p>
-	<IntervalDateControl {url} />
-	<PnlPerDayGraph pnlPerDay={data.pnlPerDay} />
-</p>
+<div class="graph-container">
+	<div class="control-container">
+		<PnlPerDayGraph pnlPerDay={data.pnlPerDay} />
+		<IntervalDateControl {url} oneLiner={true} controlSpace={true} />
+	</div>
+</div>
 <PnlFamilyPerMonth {months} />
 
 <style>
-	p {
-		width: 100%;
+	:root {
+		--control-bg-color: rgba(51, 51, 64, 0.6);
+	}
+
+	.graph-container {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
+	}
+
+	.control-container {
+		flex-shrink: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		border: 2px solid var(--control-bg-color);
+		margin-bottom: 2rem;
 	}
 </style>

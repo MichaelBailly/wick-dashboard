@@ -18,6 +18,9 @@
 	export let periodObj: ComposedPeriod = getThisMonthComposedPeriod();
 	export let url: URL;
 
+	export let oneLiner: boolean = false;
+	export let controlSpace: boolean = false;
+
 	const tag = '__REPLACEMENT__';
 
 	let urlBase: Function = (str: string) => {
@@ -34,8 +37,6 @@
 	}
 
 	$: {
-		const today = new Date();
-
 		periodObj = getThisMonthComposedPeriod();
 		const urlPeriod = $page.url.searchParams.get('period');
 		if (urlPeriod) {
@@ -47,7 +48,7 @@
 	}
 </script>
 
-<h4>
+<div class="controls-container" class:oneLiner class:controlSpace>
 	<div>
 		<Button href={urlBase(stringifyComposedPeriod(getPreviousComposedPeriod(periodObj)))}>
 			<Icon class="material-icons">chevron_left</Icon>
@@ -83,4 +84,19 @@
 			</Button>
 		</Group>
 	</div>
-</h4>
+</div>
+
+<style>
+	.controls-container {
+		display: flex;
+		flex-direction: column;
+	}
+	.oneLiner {
+		flex-direction: row;
+	}
+
+	.controlSpace {
+		width: 100%;
+		justify-content: space-between;
+	}
+</style>
