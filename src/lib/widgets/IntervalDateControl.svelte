@@ -50,7 +50,9 @@
 
 <div class="controls-container" class:oneLiner class:controlSpace>
 	<div>
-		<Button href={urlBase(stringifyComposedPeriod(getPreviousComposedPeriod(periodObj)))}>
+		<Button
+			href={urlBase(stringifyComposedPeriod(getPreviousComposedPeriod(periodObj)))}
+			data-sveltekit-preload-data="hover">
 			<Icon class="material-icons">chevron_left</Icon>
 		</Button>
 		{#if periodObj.unit === Period.Month}
@@ -58,28 +60,36 @@
 		{:else if periodObj.unit === Period.Day}
 			{format(periodObj.dates.start, 'yyyy-MM-dd')}
 		{/if}
-		<Button href={urlBase(stringifyComposedPeriod(getNextComposedPeriod(periodObj)))}>
+		<Button
+			href={urlBase(stringifyComposedPeriod(getNextComposedPeriod(periodObj)))}
+			data-sveltekit-preload-data="hover">
 			<Icon class="material-icons">chevron_right</Icon>
 		</Button>
 	</div>
 	<div>
-		<Button href={urlBase(stringifyComposedPeriod(getTodayComposedPeriod()))}>
+		<Button
+			href={urlBase(stringifyComposedPeriod(getTodayComposedPeriod()))}
+			data-sveltekit-preload-data="hover">
 			<Label>today</Label>
 		</Button>
-		<Button href={urlBase(stringifyComposedPeriod(getThisMonthComposedPeriod()))}>
+		<Button
+			href={urlBase(stringifyComposedPeriod(getThisMonthComposedPeriod()))}
+			data-sveltekit-preload-data="hover">
 			<Label>this month</Label>
 		</Button>
 		<Group variant="outlined">
 			<Button
 				href={urlBase(stringifyComposedPeriod(changeComposedPeriodUnit(periodObj, Period.Month)))}
 				color="secondary"
-				disabled={periodObj.unit === Period.Month}>
+				disabled={periodObj.unit === Period.Month}
+				data-sveltekit-preload-data="hover">
 				<Label>Monthly</Label>
 			</Button>
 			<Button
 				href={urlBase(stringifyComposedPeriod(changeComposedPeriodUnit(periodObj, Period.Day)))}
 				color="secondary"
-				disabled={periodObj.unit === Period.Day}>
+				disabled={periodObj.unit === Period.Day}
+				data-sveltekit-preload-data="hover">
 				<Label>Daily</Label>
 			</Button>
 		</Group>
