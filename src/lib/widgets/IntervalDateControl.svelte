@@ -17,6 +17,7 @@
 
 	export let periodObj: ComposedPeriod = getThisMonthComposedPeriod();
 	export let url: URL;
+	export let searchParamKey: string = 'period';
 
 	export let oneLiner: boolean = false;
 	export let controlSpace: boolean = false;
@@ -29,7 +30,7 @@
 
 	$: {
 		const urlCopy = new URL(url);
-		urlCopy.searchParams.set('period', tag);
+		urlCopy.searchParams.set(searchParamKey, tag);
 		const urlStr = urlCopy.toString();
 		urlBase = (str: string) => {
 			return urlStr.replace(tag, str);
@@ -38,7 +39,7 @@
 
 	$: {
 		periodObj = getThisMonthComposedPeriod();
-		const urlPeriod = $page.url.searchParams.get('period');
+		const urlPeriod = $page.url.searchParams.get(searchParamKey);
 		if (urlPeriod) {
 			const composed = parseComposedPeriod(urlPeriod);
 			if (composed) {
