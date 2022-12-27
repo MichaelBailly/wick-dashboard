@@ -5,8 +5,10 @@
 	import { getFamilyLabel } from '$lib/volumeReference';
 	import DataTable, { Body, Cell, Head, Label } from '@smui/data-table';
 	import Row from '@smui/data-table/src/Row.svelte';
+	import FormField from '@smui/form-field';
 	import LinearProgress from '@smui/linear-progress';
 	import Paper from '@smui/paper';
+	import Radio from '@smui/radio';
 	import Select, { Option } from '@smui/select';
 	import { setDate, sub } from 'date-fns';
 	import { onMount } from 'svelte';
@@ -24,6 +26,7 @@
 	type Families = StrategyFamilyMonthPnl[][];
 
 	let families: Families = [];
+	let familyType: string = 'volume';
 
 	let monthsData: string[] = [];
 	let composedData: ComposedItem[] = [];
@@ -31,7 +34,7 @@
 	let mounted = false;
 	let loaded = false;
 
-	$: if (mounted) loadData(months);
+	$: if (mounted) loadData(months, familyType);
 	$: composedData = getComposedData([...families]);
 
 	function getComposedData(fam: Families) {
@@ -43,10 +46,7 @@
 		for (const sfPnl of firstMonthData) {
 			const others = fam.map((f) =>
 				f.find(
-					(s) =>
-						s.type === sfPnl.type &&
-						s.config === sfPnl.config &&
-						s.volumeFamily === sfPnl.volumeFamily
+					(s) => s.type === sfPnl.type && s.config === sfPnl.config && s.family === sfPnl.family
 				)
 			);
 			if (others.some((o) => o === undefined)) {
@@ -66,7 +66,7 @@
 				};
 				composed.push(currentComposed);
 			}
-			currentComposed.families.push(sfPnl.volumeFamily);
+			currentComposed.families.push(sfPnl.family);
 			currentComposed.netPnl[0] += sfPnl.netPnl;
 			for (let i = 1; i < months; i++) {
 				// @ts-ignore
@@ -79,10 +79,13 @@
 		return composed;
 	}
 
-	function loadData(monthLen: number) {
+	function loadData(monthLen: number, familyType: string) {
 		loaded = false;
 		const monthlist = monthList(monthLen);
-		const promises = monthlist.map((m) => fetch(`/api/sfByMonth?month=${m}`).then((r) => r.json()));
+		const ftype = familyType === 'cmc' ? 'cmc' : 'volume';
+		const promises = monthlist.map((m) =>
+			fetch(`/api/sfByMonth?month=${m}&familyType=${ftype}`).then((r) => r.json())
+		);
 
 		Promise.all(promises).then((responses) => {
 			if (monthLen === months) {
@@ -116,6 +119,14 @@
 			<Option value={4}>4</Option>
 			<Option value={5}>5</Option>
 		</Select>
+		<FormField>
+			<Radio bind:group={familyType} value="cmc" disabled={familyType === 'cmc'} />
+			<span slot="label"> MarketCap </span>
+		</FormField>
+		<FormField>
+			<Radio bind:group={familyType} value="volume" disabled={familyType === 'volume'} />
+			<span slot="label"> Volume </span>
+		</FormField>
 	</p>
 
 	<DataTable style="width: 100%;">

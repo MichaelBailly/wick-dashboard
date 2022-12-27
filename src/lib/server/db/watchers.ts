@@ -19,6 +19,13 @@ export type DrawdownPerWatcher = {
 	volumeFamily?: string;
 	cmcFamily?: string;
 } & TradeTimeRangeOpts;
+export type PnlPerCMCFamily = {
+	watcher: Watcher;
+	cmcFamily: string;
+	pnl: number;
+	tradeCount: number;
+	netPnl: number;
+};
 
 export async function getPnlPerVolumeFamily(
 	opts: TradeTimeRangeOpts = {}
@@ -125,76 +132,6 @@ function isPnlPerVolumeFamily(arg: unknown): arg is PnlPerVolumeFamily {
 		typeof (arg as PnlPerVolumeFamily).tradeCount === 'number' &&
 		typeof (arg as PnlPerVolumeFamily).netPnl === 'number'
 	);
-}
-
-export async function getDrawdown(opts: DrawdownPerWatcher) {
-	let start: Date;
-	let end: Date;
-	if (opts.start) {
-		start = opts.start;
-	} else {
-		start = getDateAtMidnightUTC(startOfMonth(new Date()));
-	}
-	if (opts.end) {
-		end = opts.end;
-	} else {
-		end = new Date();
-	}
-	const watcher = opts.watcher
-		? { 'watcher.type': opts.watcher.type, 'watcher.config': opts.watcher.config }
-		: {};
-	const volumeFamily = opts.volumeFamily ? { volumeFamily: opts.volumeFamily } : {};
-	const cmcFamily = opts.cmcFamily ? { cmcFamily: opts.cmcFamily } : {};
-
-	const collection = await getTradeCollection();
-
-	const response = collection.aggregate([
-		{
-			$match: {
-				...watcher,
-				...volumeFamily,
-				...cmcFamily,
-				boughtTimestamp: {
-					$gte: start,
-					$lt: end
-				}
-			}
-		},
-		{
-			$sort: { boughtTimestamp: 1, _id: 1 }
-		}
-	]);
-	let pnl = 0;
-	let highestPnl = 0;
-	let lowestPnl = +Infinity;
-	let maxDrawdown = 0;
-	const maxDrawdownHistory: number[] = [];
-
-	while (response.hasNext()) {
-		const trade = await response.next();
-		if (!isTradeRecordClient(trade)) {
-			throw new Error('Bad document output from datastore');
-		}
-		pnl += trade.pnl;
-		if (pnl < lowestPnl) {
-			lowestPnl = pnl;
-		}
-		if (pnl > highestPnl) {
-			// ATH
-			highestPnl = pnl;
-			lowestPnl = +Infinity;
-			if (maxDrawdown > 0) {
-				maxDrawdownHistory.push(maxDrawdown);
-			}
-		}
-
-		const drawdown = highestPnl - lowestPnl > 0 ? highestPnl - lowestPnl : maxDrawdown;
-
-		if (drawdown > maxDrawdown) {
-			maxDrawdown = drawdown;
-		}
-	}
-	return Math.max(...maxDrawdownHistory.concat([maxDrawdown]));
 }
 
 type GetDrawdownsOpts = {
@@ -316,4 +253,112 @@ function getWorkData(
 		watchersMap.set(watcherHash, wdata);
 	}
 	return wdata;
+}
+
+export async function getPnlPerCMCFamily(
+	opts: TradeTimeRangeOpts = {}
+): Promise<PnlPerCMCFamily[]> {
+	let start: Date;
+	let end: Date;
+	if (opts.start) {
+		start = opts.start;
+	} else {
+		start = getDateAtMidnightUTC(startOfMonth(new Date()));
+	}
+	if (opts.end) {
+		end = opts.end;
+	} else {
+		end = new Date();
+	}
+
+	const collection = await getTradeCollection();
+	const response = await collection
+		.aggregate([
+			{
+				$match: {
+					cmcFamily: {
+						$exists: true,
+						$ne: 'unknown'
+					},
+					boughtTimestamp: {
+						$gte: start,
+						$lt: end
+					}
+				}
+			},
+			{
+				$group: {
+					_id: {
+						$concat: ['$cmcFamily', ' ', '$watcher.type', ' ', '$watcher.config']
+					},
+					pnl: {
+						$sum: '$pnl'
+					},
+					tradeCount: {
+						$count: {}
+					}
+				}
+			},
+			{
+				$match: {
+					pnl: {
+						$gt: 0
+					}
+				}
+			},
+			{
+				$addFields: {
+					netPnl: {
+						$subtract: [
+							'$pnl',
+							{
+								$multiply: ['$tradeCount', FEE_PER_TRADE]
+							}
+						]
+					}
+				}
+			},
+			{
+				$match: {
+					netPnl: {
+						$gt: 0
+					}
+				}
+			}
+		])
+		.toArray();
+
+	const result = response.map((item) => {
+		console.log(item);
+		const [family, watcherType, watcherConfig] = item._id.split(' ');
+		return {
+			watcher: {
+				type: watcherType,
+				config: watcherConfig
+			},
+			cmcFamily: family,
+			pnl: item.pnl,
+			tradeCount: item.tradeCount,
+			netPnl: item.netPnl
+		};
+	});
+	if (!result.every(isPnlPerCMCFamily)) {
+		throw new Error('Invalid response from database');
+	}
+	return result;
+}
+
+function isPnlPerCMCFamily(arg: unknown): arg is PnlPerCMCFamily {
+	return (
+		typeof arg === 'object' &&
+		arg !== null &&
+		typeof (arg as PnlPerCMCFamily).watcher === 'object' &&
+		(arg as PnlPerCMCFamily).watcher !== null &&
+		typeof (arg as PnlPerCMCFamily).watcher.type === 'string' &&
+		typeof (arg as PnlPerCMCFamily).watcher.config === 'string' &&
+		typeof (arg as PnlPerCMCFamily).cmcFamily === 'string' &&
+		typeof (arg as PnlPerCMCFamily).pnl === 'number' &&
+		typeof (arg as PnlPerCMCFamily).tradeCount === 'number' &&
+		typeof (arg as PnlPerCMCFamily).netPnl === 'number'
+	);
 }
