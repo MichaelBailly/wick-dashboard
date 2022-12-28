@@ -1,7 +1,7 @@
 import { getNetPnl } from '$lib/tradeUtils';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import type { TradeRecordClient } from '$lib/types/TradeRecordClient';
-import { getReference, getVolumeFamily, loadReference } from '$lib/volumeReference';
+import { FamilyId, getReference, getVolumeFamily, loadReference } from '$lib/volumeReference';
 import { getVolumeReference } from './db/references';
 
 export async function ensureReferencesAreLoaded() {
@@ -18,6 +18,7 @@ export function toDashboardTrade(trade: TradeRecordClient): DashboardTrade {
 	return {
 		...result,
 		volumeFamily: trade.volumeFamily || getVolumeFamily(trade.pair),
+		cmcFamily: trade.cmcFamily || FamilyId.unknown,
 		netPnl: getNetPnl(trade)
 	};
 }
