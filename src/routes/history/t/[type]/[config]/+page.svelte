@@ -8,6 +8,7 @@
 	import Button, { Group, Icon } from '@smui/button';
 	import Checkbox from '@smui/checkbox';
 	import FormField from '@smui/form-field';
+	import Radio from '@smui/radio';
 	import Tab, { Label } from '@smui/tab';
 	import TabBar from '@smui/tab-bar';
 	import { format } from 'date-fns';
@@ -26,10 +27,17 @@
 
 	export let data: { trades: DashboardTrade[] };
 
-	const selectedVolume: Record<string, boolean> = {};
+	const familyTypes: Map<string, Function> = new Map();
+	familyTypes.set('volume', function (tra: DashboardTrade) {
+		return tra.volumeFamily;
+	});
+	familyTypes.set('cmc', (t: DashboardTrade) => t.cmcFamily);
+
+	const selectedFamily: Record<string, boolean> = {};
 
 	const today = new Date();
 
+	let selectedFamilyType = 'volume';
 	let selectedTimerange: Period = Period.Month;
 	let periodObj: ComposedPeriod =
 		parseComposedPeriod(`${Period.Month}-${format(today, 'yyyyMM')}`) ||
@@ -40,20 +48,15 @@
 	let activeTrades: DashboardTrade[] = [...data.trades];
 
 	for (const volumeFamily of VolumeFamilies) {
-		selectedVolume[volumeFamily.name] = true;
+		selectedFamily[volumeFamily.name] = true;
 	}
 
 	$: {
-		if (Object.values(selectedVolume).every((v) => v)) {
+		if (Object.values(selectedFamily).every((v) => v)) {
 			activeTrades = [...data.trades];
 		} else {
 			let newActiveTrades: DashboardTrade[] = [];
-			data.trades.forEach((t) => {
-				const familyName = t.volumeFamily;
-				if (familyName && selectedVolume[familyName]) {
-					newActiveTrades.push(t);
-				}
-			});
+			data.trades.forEach((t) => filterByWhatever(t, newActiveTrades, selectedFamilyType));
 			activeTrades = newActiveTrades;
 		}
 	}
@@ -74,20 +77,32 @@
 	}
 
 	function isAllSelected() {
-		return Object.values(selectedVolume).every((v) => v);
+		return Object.values(selectedFamily).every((v) => v);
 	}
 	function updateActiveTrades() {
 		if (isAllSelected()) {
 			activeTrades = [...data.trades];
 		} else {
 			let newActiveTrades: DashboardTrade[] = [];
-			data.trades.forEach((t) => {
-				const familyName = t.volumeFamily;
-				if (familyName && selectedVolume[familyName]) {
-					newActiveTrades.push(t);
-				}
-			});
+			data.trades.forEach((t) => filterByWhatever(t, newActiveTrades, selectedFamilyType));
 			activeTrades = newActiveTrades;
+		}
+	}
+
+	function filterByWhatever(
+		trade: DashboardTrade,
+		coll: Array<DashboardTrade>,
+		familyType = selectedFamilyType
+	) {
+		console.log('filtering by whatever', familyType, selectedFamilyType);
+		const familyPropName =
+			familyTypes.get(familyType) ||
+			function (tr: DashboardTrade) {
+				return tr.volumeFamily;
+			};
+		const familyName = familyPropName(trade);
+		if (familyName && selectedFamily[familyName]) {
+			coll.push(trade);
 		}
 	}
 </script>
@@ -154,9 +169,21 @@
 	</div>
 </h4>
 <p>
+	<FormField>
+		<Radio bind:group={selectedFamilyType} value="cmc" disabled={selectedFamilyType === 'cmc'} />
+		<span slot="label"> MarketCap </span>
+	</FormField>
+	<FormField>
+		<Radio
+			bind:group={selectedFamilyType}
+			value="volume"
+			disabled={selectedFamilyType === 'volume'} />
+		<span slot="label"> Volume </span>
+	</FormField>
+	<span class="material-icons separator">minimize</span>
 	{#each VolumeFamilies as family}
 		<FormField>
-			<Checkbox bind:checked={selectedVolume[family.name]} on:input={updateActiveTrades} />
+			<Checkbox bind:checked={selectedFamily[family.name]} on:input={updateActiveTrades} />
 			<span slot="label">{family.label}</span>
 		</FormField>
 	{/each}
@@ -190,5 +217,10 @@
 	h4 {
 		display: flex;
 		justify-content: start;
+	}
+
+	.separator {
+		opacity: 0.6;
+		margin-left: 0.5rem;
 	}
 </style>

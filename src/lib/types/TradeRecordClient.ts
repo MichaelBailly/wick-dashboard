@@ -14,6 +14,7 @@ export type TradeRecordClient = {
 	low: number;
 	pair: string;
 	volumeFamily: FamilyId;
+	cmcFamily: FamilyId;
 	soldAmount: number;
 	soldPrice: number;
 	pnl: number;
