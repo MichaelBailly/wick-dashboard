@@ -201,3 +201,62 @@ export function isPnlPerDay(test: unknown): test is PnlPerDay {
 		typeof (test as PnlPerDay).tradeCount === 'number'
 	);
 }
+
+export type PnlPerVol = {
+	family: string;
+	pnl: number;
+	tradeCount: number;
+	pnlPerTrade: number;
+};
+
+export async function getPnlPerVolumeFamily(opts: TradeTimeRangeOpts = {}): Promise<PnlPerVol[]> {
+	const query: TradeTimeRangeMongoQuery = {};
+
+	if (opts.start && opts.start instanceof Date) {
+		query.$and = [{ boughtTimestamp: { $gte: opts.start } }];
+	}
+	if (opts.end && opts.end instanceof Date) {
+		if (!query.$and) {
+			query.$and = [];
+		}
+		query.$and.push({ boughtTimestamp: { $lt: opts.end } });
+	}
+
+	const pipeline = [
+		{
+			$match: query
+		},
+		{
+			$group: {
+				_id: '$volumeFamily',
+				pnl: { $sum: '$pnl' },
+				tradeCount: { $sum: 1 }
+			}
+		}
+	];
+
+	const collection = await getTradeCollection();
+	const trades = await collection.aggregate(pipeline).toArray();
+	const pnlPerVol = trades.map((t) => ({
+		family: t._id,
+		pnl: t.pnl,
+		tradeCount: t.tradeCount,
+		pnlPerTrade: t.pnl / t.tradeCount
+	}));
+
+	if (pnlPerVol.every(isPnlPerVol)) {
+		return pnlPerVol;
+	}
+	throw new Error('Unable to fetch pnlPerDay');
+}
+
+function isPnlPerVol(test: unknown): test is PnlPerVol {
+	return (
+		typeof test !== null &&
+		typeof test !== undefined &&
+		typeof (test as PnlPerVol).family === 'string' &&
+		typeof (test as PnlPerVol).pnl === 'number' &&
+		typeof (test as PnlPerVol).tradeCount === 'number' &&
+		typeof (test as PnlPerVol).pnlPerTrade === 'number'
+	);
+}

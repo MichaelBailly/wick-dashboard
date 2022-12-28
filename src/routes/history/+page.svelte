@@ -41,7 +41,8 @@
 		};
 
 		// results formatting
-		pnlPerVol = data.pnlPerVol;
+		pnlPerVol = [...data.pnlPerVol];
+		pnlPerVol.sort((a, b) => b.pnl - a.pnl);
 		pnlPerType = computePnlPerType(data.pnlPerType, showNegativePnL);
 	}
 </script>
