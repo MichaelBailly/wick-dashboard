@@ -19,7 +19,7 @@ export async function load({ url }: { url: URL }) {
 		netPnl: getNetPnl(trade)
 	}));
 
-	const bestGroupPerType = computeBestGroupPerType(dashboardTrades);
+	const bestGroupPerType = computeBestGroupPerType({ start, end });
 	const pnlPerType = computePerTypePerVolumeFamily(dashboardTrades);
 
 	return {

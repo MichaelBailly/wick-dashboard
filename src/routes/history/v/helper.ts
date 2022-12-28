@@ -1,3 +1,4 @@
+import { getGroupsPerType } from '$lib/server/db/history-volume';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import type { Watcher } from '$lib/types/Watcher';
 import { FamilyId, getFamilyLabel } from '$lib/volumeReference';
@@ -52,7 +53,39 @@ export type BestGroup = {
 	families: string[];
 };
 
-export function computeBestGroupPerType(trades: DashboardTrade[]) {
+export async function computeBestGroupPerType({ start, end }: { start: Date; end: Date }) {
+	const groupsPerType = await getGroupsPerType({ start, end });
+	const bestGroupPerType: BestGroup[] = [];
+	for (const gpt of groupsPerType) {
+		const bgpt: BestGroup = {
+			xs: gpt.xs,
+			s: gpt.s,
+			m: gpt.m,
+			l: gpt.l,
+			xl: gpt.xl,
+			watcher: gpt.watcher,
+			pnl: 0,
+			families: []
+		};
+		for (const family of ['xs', 's', 'm', 'l', 'xl']) {
+			const pnl = bgpt[family as FamilyName];
+			if (pnl > 0) {
+				bgpt.pnl = pnl;
+				bgpt.families.push(family);
+			}
+		}
+		bestGroupPerType.push(bgpt);
+	}
+
+	const result = bestGroupPerType
+		.filter((best) => best.pnl > 0)
+		.map((best) => ({ ...best, families: best.families.map(getFamilyLabel) }));
+	result.sort((a, b) => b.pnl - a.pnl);
+
+	return result;
+}
+
+export function computeBestGroupPerType2(trades: DashboardTrade[]) {
 	let bestGroupPerType: BestGroup[] = [];
 	trades.forEach((t) => {
 		const family = t.volumeFamily;
