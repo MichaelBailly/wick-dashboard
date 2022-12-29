@@ -1,7 +1,6 @@
-import { getGroupsPerType } from '$lib/server/db/history-volume';
-import type { DashboardTrade } from '$lib/types/DashboardTrade';
+import { getGroupsPerType, getPnlPerTypePerVolumeFamily } from '$lib/server/db/history-volume';
 import type { Watcher } from '$lib/types/Watcher';
-import { FamilyId, getFamilyLabel } from '$lib/volumeReference';
+import { getFamilyLabel } from '$lib/volumeReference';
 
 export type PnlPerTypePerVolumeFamily = {
 	volumeFamily: string;
@@ -10,34 +9,23 @@ export type PnlPerTypePerVolumeFamily = {
 	watcher: Watcher;
 };
 
-export function computePerTypePerVolumeFamily(trades: DashboardTrade[]) {
-	let pnlPerTypePerVolumeFamily: PnlPerTypePerVolumeFamily[] = [];
-	trades.forEach((t) => {
-		const family = t.volumeFamily;
-		if (!family) return;
-		let pptpvf = pnlPerTypePerVolumeFamily.find(
-			(p) =>
-				p.watcher.type === t.watcher.type &&
-				p.watcher.config === t.watcher.config &&
-				p.volumeFamily === family
-		);
-		if (!pptpvf) {
-			pptpvf = {
-				volumeFamily: family,
-				pnl: 0,
-				tradeCount: 0,
-				watcher: { ...t.watcher }
-			};
-			pnlPerTypePerVolumeFamily.push(pptpvf);
-		}
-		pptpvf.pnl += t.netPnl;
-		pptpvf.tradeCount += 1;
-	});
-	pnlPerTypePerVolumeFamily = pnlPerTypePerVolumeFamily.map((p) => ({
-		...p,
-		volumeFamily: getFamilyLabel(p.volumeFamily)
+export async function computePerTypePerVolumeFamily({
+	start,
+	end
+}: {
+	start: Date;
+	end: Date;
+}): Promise<PnlPerTypePerVolumeFamily[]> {
+	const pptpvf = await getPnlPerTypePerVolumeFamily({ start, end });
+
+	const pnlPerTypePerVolumeFamily = pptpvf.map((p) => ({
+		watcher: p.watcher,
+		volumeFamily: getFamilyLabel(p.volumeFamily),
+		pnl: p.pnl,
+		tradeCount: p.tradeCount
 	}));
 	pnlPerTypePerVolumeFamily.sort((a, b) => b.pnl - a.pnl);
+
 	return pnlPerTypePerVolumeFamily;
 }
 
@@ -83,53 +71,4 @@ export async function computeBestGroupPerType({ start, end }: { start: Date; end
 	result.sort((a, b) => b.pnl - a.pnl);
 
 	return result;
-}
-
-export function computeBestGroupPerType2(trades: DashboardTrade[]) {
-	let bestGroupPerType: BestGroup[] = [];
-	trades.forEach((t) => {
-		const family = t.volumeFamily;
-		if (!family) return;
-		if (
-			family !== FamilyId.xs &&
-			family !== FamilyId.s &&
-			family !== FamilyId.m &&
-			family !== FamilyId.l &&
-			family !== FamilyId.xl
-		) {
-			return;
-		}
-		let bgt = bestGroupPerType.find(
-			(p) => p.watcher.type === t.watcher.type && p.watcher.config === t.watcher.config
-		);
-		if (!bgt) {
-			bgt = {
-				xs: 0,
-				s: 0,
-				m: 0,
-				l: 0,
-				xl: 0,
-				pnl: 0,
-				families: [],
-				watcher: { ...t.watcher }
-			};
-			bestGroupPerType.push(bgt);
-		}
-		bgt[family] += t.netPnl;
-	});
-	for (const b of bestGroupPerType) {
-		for (const f of ['xs', 's', 'm', 'l', 'xl']) {
-			const fname = f as FamilyName;
-			if (b[fname] > 0) {
-				b.pnl += b[fname];
-				b.families.push(f);
-			}
-		}
-	}
-	bestGroupPerType = bestGroupPerType
-		.filter((best) => best.pnl > 0)
-		.map((best) => ({ ...best, families: best.families.map(getFamilyLabel) }));
-	bestGroupPerType.sort((a, b) => b.pnl - a.pnl);
-
-	return bestGroupPerType;
 }
