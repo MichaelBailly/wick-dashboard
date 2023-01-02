@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { parseMonthStringOrNow } from '$lib/dates';
+	import type { PnlPerCmcFamily } from '$lib/server/db/trades';
 	import type { PnlPerType } from '$lib/types/PnlPerType';
 	import { getFamilyLabel } from '$lib/volumeReference';
 	import MoreLink from '$lib/widgets/MoreLink.svelte';
@@ -13,7 +14,12 @@
 	import { computePnlPerType, type PnlPerVol } from './helpers';
 
 	/** @type {import('./$types').PageData} */
-	export let data: { pnlPerVol: PnlPerVol[]; period: string; pnlPerType: PnlPerType[] };
+	export let data: {
+		pnlPerVol: PnlPerVol[];
+		period: string;
+		pnlPerType: PnlPerType[];
+		pnlPerCmc: PnlPerCmcFamily[];
+	};
 
 	let period: string = '';
 

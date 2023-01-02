@@ -1,5 +1,6 @@
 import { FEE_BUY, FEE_SELL } from '$lib/tradeUtils';
 import { isPnlPerType, type PnlPerType } from '$lib/types/PnlPerType';
+import type { Watcher } from '$lib/types/Watcher';
 import { sub } from 'date-fns';
 import { isTradeRecordClient, type TradeRecordClient } from 'src/lib/types/TradeRecordClient';
 import { getTradeCollection } from '.';
@@ -255,5 +256,71 @@ function isPnlPerVol(test: unknown): test is PnlPerVol {
 		typeof (test as PnlPerVol).pnl === 'number' &&
 		typeof (test as PnlPerVol).tradeCount === 'number' &&
 		typeof (test as PnlPerVol).pnlPerTrade === 'number'
+	);
+}
+
+export async function getPnlPerCmcFamily(opts: TradeTimeRangeOpts = {}) {
+	const query: TradeTimeRangeMongoQuery = {};
+	if (opts.start && opts.start instanceof Date) {
+		query.$and = [{ boughtTimestamp: { $gte: opts.start } }];
+	}
+	if (opts.end && opts.end instanceof Date) {
+		if (!query.$and) {
+			query.$and = [];
+		}
+		query.$and.push({ boughtTimestamp: { $lt: opts.end } });
+	}
+	const match = { ...query, cmcFamily: { $exists: true } };
+
+	const pipeline = [
+		{
+			$match: match
+		},
+		{
+			$group: {
+				_id: { $concat: ['$cmcFamily', ' ', '$watcher.type', ' ', '$watcher.config'] },
+				netPnl: {
+					$sum: {
+						$subtract: [
+							{ $subtract: [{ $multiply: ['$soldAmount', '$soldPrice'] }, '$quoteAmount'] },
+							{
+								$add: [
+									{ $multiply: ['$quoteAmount', FEE_BUY] },
+									{ $multiply: ['$soldAmount', '$soldPrice', FEE_SELL] }
+								]
+							}
+						]
+					}
+				},
+				tradeCount: { $sum: 1 },
+				cmcFamily: { $first: '$cmcFamily' },
+				watcher: { $first: '$watcher' }
+			}
+		},
+		{ $sort: { netPnl: -1, _id: 1 } }
+	];
+	const collection = await getTradeCollection();
+	const pnlPerCmcFamily = await collection.aggregate(pipeline).toArray();
+	if (!pnlPerCmcFamily.every(isPnlPerCmcFamily)) {
+		throw new Error('Unable to fetch pnlPerCmcFamily');
+	}
+	return pnlPerCmcFamily;
+}
+
+export type PnlPerCmcFamily = {
+	netPnl: number;
+	tradeCount: number;
+	cmcFamily: string;
+	watcher: Watcher;
+};
+
+export function isPnlPerCmcFamily(test: unknown): test is PnlPerCmcFamily {
+	return (
+		typeof test !== null &&
+		typeof test !== undefined &&
+		typeof (test as PnlPerCmcFamily).netPnl === 'number' &&
+		typeof (test as PnlPerCmcFamily).tradeCount === 'number' &&
+		typeof (test as PnlPerCmcFamily).cmcFamily === 'string' &&
+		typeof (test as PnlPerCmcFamily).watcher === 'object'
 	);
 }
