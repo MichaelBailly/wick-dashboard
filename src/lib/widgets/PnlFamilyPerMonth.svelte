@@ -16,12 +16,15 @@
 	import Pnl from './Pnl.svelte';
 
 	export let months: number = 3;
+	export let fetchImpl: FetchFunction = fetch;
 
 	type ComposedItem = {
 		watcher: Watcher;
 		families: string[];
 		netPnl: number[];
 	};
+
+	type FetchFunction = (input: RequestInfo, init?: RequestInit) => Promise<Response>;
 
 	type Families = StrategyFamilyMonthPnl[][];
 
@@ -84,7 +87,7 @@
 		const monthlist = monthList(monthLen);
 		const ftype = familyType === 'cmc' ? 'cmc' : 'volume';
 		const promises = monthlist.map((m) =>
-			fetch(`/api/sfByMonth?month=${m}&familyType=${ftype}`).then((r) => r.json())
+			fetchImpl(`/api/sfByMonth?month=${m}&familyType=${ftype}`).then((r) => r.json())
 		);
 
 		Promise.all(promises).then((responses) => {
