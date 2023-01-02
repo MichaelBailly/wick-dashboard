@@ -1,10 +1,11 @@
 import { getAtMidnightUTC, parseMonthStringOrNow } from '$lib/dates';
 import { ensureReferencesAreLoaded } from '$lib/server/dashboardTradeConverter';
-import { getPnlPerVolumeFamily, getTradePnl } from '$lib/server/db/trades';
+import { getPnlPerCmcFamily, getPnlPerVolumeFamily, getTradePnl } from '$lib/server/db/trades';
+import type { ServerLoadEvent } from '@sveltejs/kit';
 import { add, format } from 'date-fns';
 
 /** @type {import('./$types').PageServerLoad} */
-export async function load({ url }: { url: URL }) {
+export async function load({ url }: ServerLoadEvent) {
 	const period = url.searchParams.get('period');
 	const [year, month] = parseMonthStringOrNow(period);
 	const start = getAtMidnightUTC(year, month, 1);
@@ -18,6 +19,7 @@ export async function load({ url }: { url: URL }) {
 	return {
 		period: realPeriod,
 		pnlPerVol,
-		pnlPerType
+		pnlPerType,
+		pnlPerCmc: getPnlPerCmcFamily({ start, end })
 	};
 }
