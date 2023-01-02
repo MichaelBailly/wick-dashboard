@@ -7,6 +7,10 @@
 	import Drawer, { AppContent, Content } from '@smui/drawer';
 	import List, { Item, Text } from '@smui/list';
 	import 'material-icons/iconfont/material-icons.css';
+
+	import { readFamilySource } from '$lib/stores/familySource';
+
+	readFamilySource();
 </script>
 
 <div class="page-container">

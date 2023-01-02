@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { FamilySource, familySource } from '$lib/stores/familySource';
 	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import { Period } from '$lib/types/Period';
 	import { VolumeFamilies } from '$lib/volumeReference';
@@ -27,17 +28,14 @@
 
 	export let data: { trades: DashboardTrade[] };
 
-	const familyTypes: Map<string, Function> = new Map();
-	familyTypes.set('volume', function (tra: DashboardTrade) {
-		return tra.volumeFamily;
-	});
-	familyTypes.set('cmc', (t: DashboardTrade) => t.cmcFamily);
+	const familyTypes: Map<FamilySource, Function> = new Map();
+	familyTypes.set(FamilySource.Volume, (t: DashboardTrade) => t.volumeFamily);
+	familyTypes.set(FamilySource.Cmc, (t: DashboardTrade) => t.cmcFamily);
 
 	const selectedFamily: Record<string, boolean> = {};
 
 	const today = new Date();
 
-	let selectedFamilyType = 'volume';
 	let selectedTimerange: Period = Period.Month;
 	let periodObj: ComposedPeriod =
 		parseComposedPeriod(`${Period.Month}-${format(today, 'yyyyMM')}`) ||
@@ -56,7 +54,7 @@
 			activeTrades = [...data.trades];
 		} else {
 			let newActiveTrades: DashboardTrade[] = [];
-			data.trades.forEach((t) => filterByWhatever(t, newActiveTrades, selectedFamilyType));
+			data.trades.forEach((t) => filterByWhatever(t, newActiveTrades, $familySource));
 			activeTrades = newActiveTrades;
 		}
 	}
@@ -84,19 +82,14 @@
 			activeTrades = [...data.trades];
 		} else {
 			let newActiveTrades: DashboardTrade[] = [];
-			data.trades.forEach((t) => filterByWhatever(t, newActiveTrades, selectedFamilyType));
+			data.trades.forEach((t) => filterByWhatever(t, newActiveTrades, $familySource));
 			activeTrades = newActiveTrades;
 		}
 	}
 
-	function filterByWhatever(
-		trade: DashboardTrade,
-		coll: Array<DashboardTrade>,
-		familyType = selectedFamilyType
-	) {
-		console.log('filtering by whatever', familyType, selectedFamilyType);
+	function filterByWhatever(trade: DashboardTrade, coll: Array<DashboardTrade>, _s: unknown) {
 		const familyPropName =
-			familyTypes.get(familyType) ||
+			familyTypes.get($familySource) ||
 			function (tr: DashboardTrade) {
 				return tr.volumeFamily;
 			};
@@ -170,16 +163,20 @@
 </h4>
 <p>
 	<FormField>
-		<Radio bind:group={selectedFamilyType} value="cmc" disabled={selectedFamilyType === 'cmc'} />
+		<Radio
+			bind:group={$familySource}
+			value={FamilySource.Cmc}
+			disabled={$familySource === FamilySource.Cmc} />
 		<span slot="label"> MarketCap </span>
 	</FormField>
 	<FormField>
 		<Radio
-			bind:group={selectedFamilyType}
-			value="volume"
-			disabled={selectedFamilyType === 'volume'} />
+			bind:group={$familySource}
+			value={FamilySource.Volume}
+			disabled={$familySource === FamilySource.Volume} />
 		<span slot="label"> Volume </span>
 	</FormField>
+
 	<span class="material-icons separator">minimize</span>
 	{#each VolumeFamilies as family}
 		<FormField>
