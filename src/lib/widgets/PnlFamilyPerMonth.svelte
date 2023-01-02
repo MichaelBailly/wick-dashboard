@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { toMonthString } from '$lib/dates';
+	import { FamilySource, familySource } from '$lib/stores/familySource';
 	import type { StrategyFamilyMonthPnl } from '$lib/types/StrategyFamilyMonthPnl';
 	import type { Watcher } from '$lib/types/Watcher';
 	import { getFamilyLabel } from '$lib/volumeReference';
@@ -29,7 +30,6 @@
 	type Families = StrategyFamilyMonthPnl[][];
 
 	let families: Families = [];
-	let familyType: string = 'volume';
 
 	let monthsData: string[] = [];
 	let composedData: ComposedItem[] = [];
@@ -37,7 +37,7 @@
 	let mounted = false;
 	let loaded = false;
 
-	$: if (mounted) loadData(months, familyType);
+	$: if (mounted) loadData(months, $familySource);
 	$: composedData = getComposedData([...families]);
 
 	function getComposedData(fam: Families) {
@@ -123,11 +123,17 @@
 			<Option value={5}>5</Option>
 		</Select>
 		<FormField>
-			<Radio bind:group={familyType} value="cmc" disabled={familyType === 'cmc'} />
+			<Radio
+				bind:group={$familySource}
+				value={FamilySource.Cmc}
+				disabled={$familySource === FamilySource.Cmc} />
 			<span slot="label"> MarketCap </span>
 		</FormField>
 		<FormField>
-			<Radio bind:group={familyType} value="volume" disabled={familyType === 'volume'} />
+			<Radio
+				bind:group={$familySource}
+				value={FamilySource.Volume}
+				disabled={$familySource === FamilySource.Volume} />
 			<span slot="label"> Volume </span>
 		</FormField>
 	</p>
