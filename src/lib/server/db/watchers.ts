@@ -19,6 +19,7 @@ export type DrawdownPerWatcher = {
 	volumeFamily?: string;
 	cmcFamily?: string;
 } & TradeTimeRangeOpts;
+
 export type PnlPerCMCFamily = {
 	watcher: Watcher;
 	cmcFamily: string;
@@ -361,4 +362,70 @@ function isPnlPerCMCFamily(arg: unknown): arg is PnlPerCMCFamily {
 		typeof (arg as PnlPerCMCFamily).tradeCount === 'number' &&
 		typeof (arg as PnlPerCMCFamily).netPnl === 'number'
 	);
+}
+
+export async function getDrawdown(opts: DrawdownPerWatcher) {
+	let start: Date;
+	let end: Date;
+	if (opts.start) {
+		start = opts.start;
+	} else {
+		start = getDateAtMidnightUTC(startOfMonth(new Date()));
+	}
+	if (opts.end) {
+		end = opts.end;
+	} else {
+		end = new Date();
+	}
+	const volumeFamily = opts.volumeFamily ? { volumeFamily: opts.volumeFamily } : {};
+	const cmcFamily = opts.cmcFamily ? { cmcFamily: opts.cmcFamily } : {};
+
+	const collection = await getTradeCollection();
+
+	const response = collection.aggregate([
+		{
+			$match: {
+				...volumeFamily,
+				...cmcFamily,
+				boughtTimestamp: {
+					$gte: start,
+					$lt: end
+				}
+			}
+		},
+		{
+			$sort: { boughtTimestamp: 1, _id: 1 }
+		}
+	]);
+	let pnl = 0;
+	let highestPnl = 0;
+	let lowestPnl = +Infinity;
+	let maxDrawdown = 0;
+	const maxDrawdownHistory: number[] = [];
+
+	while (response.hasNext()) {
+		const trade = await response.next();
+		if (!isTradeRecordClient(trade)) {
+			throw new Error('Bad document output from datastore');
+		}
+		pnl += trade.pnl;
+		if (pnl < lowestPnl) {
+			lowestPnl = pnl;
+		}
+		if (pnl > highestPnl) {
+			// ATH
+			highestPnl = pnl;
+			lowestPnl = +Infinity;
+			if (maxDrawdown > 0) {
+				maxDrawdownHistory.push(maxDrawdown);
+			}
+		}
+
+		const drawdown = highestPnl - lowestPnl > 0 ? highestPnl - lowestPnl : maxDrawdown;
+
+		if (drawdown > maxDrawdown) {
+			maxDrawdown = drawdown;
+		}
+	}
+	return Math.max(...maxDrawdownHistory.concat([maxDrawdown]));
 }
