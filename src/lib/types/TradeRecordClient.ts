@@ -24,3 +24,11 @@ export type TradeRecordClient = {
 		sellTransaction: unknown;
 	};
 };
+
+export function isTradeRecordClient(test: unknown): test is TradeRecordClient {
+	return (
+		typeof test !== null &&
+		typeof test !== undefined &&
+		(test as TradeRecordClient)._id !== undefined
+	);
+}

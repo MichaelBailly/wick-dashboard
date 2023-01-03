@@ -1,5 +1,6 @@
 import { FEE_PER_TRADE } from '$lib/constants.client';
 import { getDateAtMidnightUTC } from '$lib/dates';
+import { isTradeRecordClient } from '$lib/types/TradeRecordClient';
 import type { Watcher } from '$lib/types/Watcher';
 import { startOfMonth } from 'date-fns';
 import { getTradeCollection } from '.';
@@ -12,6 +13,12 @@ export type PnlPerVolumeFamily = {
 	tradeCount: number;
 	netPnl: number;
 };
+
+export type DrawdownPerWatcher = {
+	watcher: Watcher;
+	volumeFamily?: string;
+	cmcFamily?: string;
+} & TradeTimeRangeOpts;
 
 export async function getPnlPerVolumeFamily(
 	opts: TradeTimeRangeOpts = {}
@@ -118,4 +125,70 @@ function isPnlPerVolumeFamily(arg: unknown): arg is PnlPerVolumeFamily {
 		typeof (arg as PnlPerVolumeFamily).tradeCount === 'number' &&
 		typeof (arg as PnlPerVolumeFamily).netPnl === 'number'
 	);
+}
+
+export async function getDrawdown(opts: DrawdownPerWatcher) {
+	let start: Date;
+	let end: Date;
+	if (opts.start) {
+		start = opts.start;
+	} else {
+		start = getDateAtMidnightUTC(startOfMonth(new Date()));
+	}
+	if (opts.end) {
+		end = opts.end;
+	} else {
+		end = new Date();
+	}
+	const volumeFamily = opts.volumeFamily ? { volumeFamily: opts.volumeFamily } : {};
+	const cmcFamily = opts.cmcFamily ? { cmcFamily: opts.cmcFamily } : {};
+
+	const collection = await getTradeCollection();
+
+	const response = collection.aggregate([
+		{
+			$match: {
+				...volumeFamily,
+				...cmcFamily,
+				boughtTimestamp: {
+					$gte: start,
+					$lt: end
+				}
+			}
+		},
+		{
+			$sort: { boughtTimestamp: 1, _id: 1 }
+		}
+	]);
+	let pnl = 0;
+	let highestPnl = 0;
+	let lowestPnl = +Infinity;
+	let maxDrawdown = 0;
+	const maxDrawdownHistory: number[] = [];
+
+	while (response.hasNext()) {
+		const trade = await response.next();
+		if (!isTradeRecordClient(trade)) {
+			throw new Error('Bad document output from datastore');
+		}
+		pnl += trade.pnl;
+		if (pnl < lowestPnl) {
+			lowestPnl = pnl;
+		}
+		if (pnl > highestPnl) {
+			// ATH
+			highestPnl = pnl;
+			lowestPnl = +Infinity;
+			if (maxDrawdown > 0) {
+				maxDrawdownHistory.push(maxDrawdown);
+			}
+		}
+
+		const drawdown = highestPnl - lowestPnl > 0 ? highestPnl - lowestPnl : maxDrawdown;
+
+		if (drawdown > maxDrawdown) {
+			maxDrawdown = drawdown;
+		}
+	}
+	return Math.max(...maxDrawdownHistory.concat([maxDrawdown]));
 }

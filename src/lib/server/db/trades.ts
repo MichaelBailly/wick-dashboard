@@ -1,7 +1,7 @@
 import { FEE_BUY, FEE_SELL } from '$lib/tradeUtils';
 import { isPnlPerType, type PnlPerType } from '$lib/types/PnlPerType';
 import { sub } from 'date-fns';
-import type { TradeRecordClient } from 'src/lib/types/TradeRecordClient';
+import { isTradeRecordClient, type TradeRecordClient } from 'src/lib/types/TradeRecordClient';
 import { getTradeCollection } from '.';
 import type { TradeTimeRangeOpts } from '../../types/TradeTimeRangeOpts';
 
@@ -91,14 +91,6 @@ function applySort(trades: TradeRecordClient[], sort: SORT, sortField: SORT_FIEL
 		}
 		return 0;
 	});
-}
-
-function isTradeRecordClient(test: unknown): test is TradeRecordClient {
-	return (
-		typeof test !== null &&
-		typeof test !== undefined &&
-		(test as TradeRecordClient)._id !== undefined
-	);
 }
 
 export async function getTradePnl(opts: TradeTimeRangeOpts = {}): Promise<PnlPerType[]> {
