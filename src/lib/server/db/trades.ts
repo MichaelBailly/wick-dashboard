@@ -259,7 +259,12 @@ function isPnlPerVol(test: unknown): test is PnlPerVol {
 	);
 }
 
-export async function getPnlPerCmcFamily(opts: TradeTimeRangeOpts = {}) {
+export type GetPnlPerCmcFamilyOpts = {
+	perWatcher?: boolean;
+} & TradeTimeRangeOpts;
+
+export async function getPnlPerCmcFamily(opts: GetPnlPerCmcFamilyOpts = {}) {
+	const perWatcher = opts.perWatcher || false;
 	const query: TradeTimeRangeMongoQuery = {};
 	if (opts.start && opts.start instanceof Date) {
 		query.$and = [{ boughtTimestamp: { $gte: opts.start } }];
@@ -272,13 +277,17 @@ export async function getPnlPerCmcFamily(opts: TradeTimeRangeOpts = {}) {
 	}
 	const match = { ...query, cmcFamily: { $exists: true } };
 
+	const groupKey = perWatcher
+		? ['$cmcFamily', ' ', '$watcher.type', ' ', '$watcher.config']
+		: ['$cmcFamily'];
+
 	const pipeline = [
 		{
 			$match: match
 		},
 		{
 			$group: {
-				_id: { $concat: ['$cmcFamily', ' ', '$watcher.type', ' ', '$watcher.config'] },
+				_id: { $concat: groupKey },
 				netPnl: {
 					$sum: {
 						$subtract: [
