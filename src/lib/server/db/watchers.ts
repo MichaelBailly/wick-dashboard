@@ -1,6 +1,6 @@
 import { FEE_PER_TRADE } from '$lib/constants.client';
 import { getDateAtMidnightUTC } from '$lib/dates';
-import { isTradeRecordClient } from '$lib/types/TradeRecordClient';
+import { isTradeRecordClient, type TradeRecordClient } from '$lib/types/TradeRecordClient';
 import type { Watcher } from '$lib/types/Watcher';
 import { startOfMonth } from 'date-fns';
 import { getTradeCollection } from '.';
@@ -140,6 +140,9 @@ export async function getDrawdown(opts: DrawdownPerWatcher) {
 	} else {
 		end = new Date();
 	}
+	const watcher = opts.watcher
+		? { 'watcher.type': opts.watcher.type, 'watcher.config': opts.watcher.config }
+		: {};
 	const volumeFamily = opts.volumeFamily ? { volumeFamily: opts.volumeFamily } : {};
 	const cmcFamily = opts.cmcFamily ? { cmcFamily: opts.cmcFamily } : {};
 
@@ -148,6 +151,7 @@ export async function getDrawdown(opts: DrawdownPerWatcher) {
 	const response = collection.aggregate([
 		{
 			$match: {
+				...watcher,
 				...volumeFamily,
 				...cmcFamily,
 				boughtTimestamp: {
@@ -191,4 +195,125 @@ export async function getDrawdown(opts: DrawdownPerWatcher) {
 		}
 	}
 	return Math.max(...maxDrawdownHistory.concat([maxDrawdown]));
+}
+
+type GetDrawdownsOpts = {
+	watchers: Watcher[];
+} & TradeTimeRangeOpts;
+
+type WDrawdownInternal = {
+	watcher: Watcher;
+	pnl: number;
+	highestPnl: number;
+	lowestPnl: number;
+	maxDrawdown: number;
+	history: number[];
+	tradeCount: number;
+};
+
+export async function getDrawdowns(opts: GetDrawdownsOpts): Promise<WatcherDrawdown[]> {
+	if (!opts.watchers || !Array.isArray(opts.watchers)) {
+		throw new Error('watchers could not be null');
+	}
+
+	let start: Date;
+	let end: Date;
+	if (opts.start) {
+		start = opts.start;
+	} else {
+		start = getDateAtMidnightUTC(startOfMonth(new Date()));
+	}
+	if (opts.end) {
+		end = opts.end;
+	} else {
+		end = new Date();
+	}
+
+	const collection = await getTradeCollection();
+
+	const response = collection.aggregate([
+		{
+			$match: {
+				boughtTimestamp: {
+					$gte: start,
+					$lt: end
+				}
+			}
+		},
+		{
+			$sort: { boughtTimestamp: 1, _id: 1 }
+		}
+	]);
+	const watchersMap: Map<string, WDrawdownInternal> = new Map();
+	while (response.hasNext()) {
+		const trade = await response.next();
+		if (!isTradeRecordClient(trade)) {
+			throw new Error('Bad document output from datastore');
+		}
+		const wdata = getWorkData(trade, watchersMap);
+
+		wdata.tradeCount++;
+		wdata.pnl += trade.pnl;
+
+		getDrawdownsUpdateAlgo(wdata);
+	}
+	response.close();
+
+	return [...watchersMap.values()]
+		.map((v) => ({
+			watcher: v.watcher,
+			tradeCount: v.tradeCount,
+			drawdown: Math.max(...v.history.concat([v.maxDrawdown]))
+		}))
+		.sort((a, b) => a.drawdown - b.drawdown);
+}
+
+export type WatcherDrawdown = {
+	watcher: Watcher;
+	tradeCount: number;
+	drawdown: number;
+};
+
+function getDrawdownsUpdateAlgo(wdata: WDrawdownInternal): void {
+	if (wdata.pnl < wdata.lowestPnl) {
+		wdata.lowestPnl = wdata.pnl;
+	}
+	if (wdata.pnl > wdata.highestPnl) {
+		// ATH
+		wdata.highestPnl = wdata.pnl;
+		wdata.lowestPnl = +Infinity;
+		if (wdata.maxDrawdown > 0) {
+			wdata.history.push(wdata.maxDrawdown);
+			wdata.maxDrawdown = 0;
+		}
+	}
+
+	const drawDown =
+		wdata.highestPnl !== 0 && wdata.highestPnl - wdata.lowestPnl > 0
+			? 1 - wdata.lowestPnl / wdata.highestPnl
+			: wdata.maxDrawdown;
+	if (drawDown > wdata.maxDrawdown) {
+		wdata.maxDrawdown = drawDown;
+	}
+}
+
+function getWorkData(
+	trade: TradeRecordClient,
+	watchersMap: Map<string, WDrawdownInternal>
+): WDrawdownInternal {
+	const watcherHash = `${trade.watcher.type} ${trade.watcher.config}`;
+	let wdata = watchersMap.get(watcherHash);
+	if (!wdata) {
+		wdata = {
+			watcher: trade.watcher,
+			pnl: 0,
+			highestPnl: 0,
+			lowestPnl: +Infinity,
+			maxDrawdown: 0,
+			tradeCount: 0,
+			history: []
+		};
+		watchersMap.set(watcherHash, wdata);
+	}
+	return wdata;
 }
