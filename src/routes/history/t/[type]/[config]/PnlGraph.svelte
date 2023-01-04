@@ -54,7 +54,7 @@
 			cumulatedPnl = out.cumulatedPnl;
 			sortedTrades = out.trades;
 			if (cumulatedPnl.length) {
-				cumulatedPnl.unshift({ y: cumulatedPnl[0].y, x: getDateAtMidnightUTC(cumulatedPnl[0].x) });
+				cumulatedPnl.unshift({ y: 0, x: getDateAtMidnightUTC(cumulatedPnl[0].x) });
 			}
 
 			// @ts-ignore
@@ -174,13 +174,16 @@
 								};
 							},
 							afterLabel: ({ dataIndex }) => {
+								if (dataIndex === 0) return;
 								return formatDistance(
-									sortedTrades[dataIndex].soldTimestamp,
-									sortedTrades[dataIndex].boughtTimestamp
+									sortedTrades[dataIndex - 1].soldTimestamp,
+									sortedTrades[dataIndex - 1].boughtTimestamp
 								);
 							},
 							afterTitle: (context) => {
-								return sortedTrades[context[0].dataIndex].pair;
+								if (context[0].dataIndex === 0) return;
+
+								return sortedTrades[context[0].dataIndex - 1].pair;
 							}
 						}
 					},
