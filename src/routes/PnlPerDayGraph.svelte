@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { getDateAtMidnightUTC } from '$lib/dates';
 	import type { PnlPerDay } from '$lib/server/db/trades';
 
 	export let pnlPerDay: PnlPerDay[];
@@ -49,6 +50,12 @@
 			const out = getTradesGraphData(pnlPerDay);
 			pnl = out.pnl;
 			cumulatedPnl = out.cumulatedPnl;
+			if (cumulatedPnl.length) {
+				cumulatedPnl.unshift({
+					y: 0,
+					x: getDateAtMidnightUTC(cumulatedPnl[0].x)
+				});
+			}
 
 			// @ts-ignore
 			chart.data.datasets[0].data = pnl;
