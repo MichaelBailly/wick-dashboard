@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getDateAtMidnightUTC } from '$lib/dates';
 	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 
 	export let trades: DashboardTrade[];
@@ -52,6 +53,9 @@
 			pnl = out.pnl;
 			cumulatedPnl = out.cumulatedPnl;
 			sortedTrades = out.trades;
+			if (cumulatedPnl.length) {
+				cumulatedPnl.unshift({ y: cumulatedPnl[0].y, x: getDateAtMidnightUTC(cumulatedPnl[0].x) });
+			}
 
 			// @ts-ignore
 			chart.data.datasets[0].data = pnl;
