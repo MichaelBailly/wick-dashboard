@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { parseMonthStringOrNow } from '$lib/dates';
-	import type { PnlPerCmcFamily } from '$lib/server/db/trades';
+	import { FamilySource, familySource } from '$lib/stores/familySource';
 	import type { PnlPerType } from '$lib/types/PnlPerType';
 	import { getFamilyLabel } from '$lib/volumeReference';
 	import MoreLink from '$lib/widgets/MoreLink.svelte';
@@ -10,22 +10,20 @@
 	import FormField from '@smui/form-field';
 	import Paper from '@smui/paper';
 	import Switch from '@smui/switch';
+	import Tab from '@smui/tab';
+	import TabBar from '@smui/tab-bar';
 	import { add, format } from 'date-fns';
+	import type { PageData } from './$types';
 	import { computePnlPerType, type PnlPerVol } from './helpers';
 
-	/** @type {import('./$types').PageData} */
-	export let data: {
-		pnlPerVol: PnlPerVol[];
-		period: string;
-		pnlPerType: PnlPerType[];
-		pnlPerCmc: PnlPerCmcFamily[];
-	};
+	export let data: PageData;
 
 	let period: string = '';
 
 	let prevPeriod: { human: string; machine: string } = { human: '', machine: '' };
 	let nextPeriod: { human: string; machine: string } = { human: '', machine: '' };
 
+	let activeTab = $familySource;
 	let showNegativePnL = false;
 	let pnlPerVol: PnlPerVol[] = [];
 	let pnlPerType: PnlPerType[] = [];
@@ -51,6 +49,13 @@
 		pnlPerVol.sort((a, b) => b.pnl - a.pnl);
 		pnlPerType = computePnlPerType(data.pnlPerType, showNegativePnL);
 	}
+
+	function getLabel(tab: FamilySource) {
+		if (tab === 'cmc') {
+			return 'PnL per MarketCap family';
+		}
+		return 'PnL per volume family';
+	}
 </script>
 
 <svelte:head>
@@ -74,43 +79,93 @@
 </div>
 
 <Paper>
-	<h3>PnL per volume family <MoreLink href="/history/v" /></h3>
-	<DataTable style="width: 100%;">
-		<Head>
-			<Row>
-				<Cell columnId="volumeFamily">
-					<Label>Volume family</Label>
-				</Cell>
-				<Cell columnId="totalPnl">
-					<Label>PnL</Label>
-				</Cell>
-				<Cell columnId="PnlPerTrade">
-					<Label>Pnl per trade</Label>
-				</Cell>
-				<Cell columnId="tradeCount">
-					<Label>Trade Count</Label>
-				</Cell>
-			</Row>
-		</Head>
-		<Body>
-			{#each pnlPerVol as { family, pnl, pnlPerTrade, tradeCount }}
+	<TabBar tabs={['cmc', 'volume']} let:tab bind:active={activeTab}>
+		<!-- Note: the `tab` property is required! -->
+		<Tab {tab}>
+			<Label>{getLabel(tab)}</Label>
+		</Tab>
+	</TabBar>
+	{#if activeTab === FamilySource.Cmc}
+		<DataTable style="width: 100%;">
+			<Head>
 				<Row>
-					<Cell>
-						{getFamilyLabel(family)}
+					<Cell columnId="cmcFamily">
+						<Label>MarketCap family</Label>
 					</Cell>
-					<Cell>
-						$<Pnl {pnl} />
+					<Cell columnId="totalPnl">
+						<Label>PnL</Label>
 					</Cell>
-					<Cell>
-						$<Pnl pnl={pnlPerTrade} />
+					<Cell columnId="PnlPerTrade">
+						<Label>Pnl per trade</Label>
 					</Cell>
-					<Cell>
-						{tradeCount}
+					<Cell columnId="tradeCount">
+						<Label>Trade Count</Label>
 					</Cell>
 				</Row>
-			{/each}
-		</Body>
-	</DataTable>
+			</Head>
+			<Body>
+				{#each data.pnlPerCmc as { cmcFamily, netPnl, tradeCount }}
+					<Row>
+						<Cell>
+							{cmcFamily}
+						</Cell>
+						<Cell>
+							$<Pnl pnl={netPnl} />
+						</Cell>
+						<Cell>
+							$<Pnl pnl={netPnl / tradeCount} />
+						</Cell>
+						<Cell>
+							{tradeCount}
+						</Cell>
+					</Row>
+				{/each}
+			</Body>
+		</DataTable>
+		<div>
+			<a href="/history/v">More...</a>
+		</div>
+	{:else}
+		<DataTable style="width: 100%;">
+			<Head>
+				<Row>
+					<Cell columnId="volumeFamily">
+						<Label>Volume family</Label>
+					</Cell>
+					<Cell columnId="totalPnl">
+						<Label>PnL</Label>
+					</Cell>
+					<Cell columnId="PnlPerTrade">
+						<Label>Pnl per trade</Label>
+					</Cell>
+					<Cell columnId="tradeCount">
+						<Label>Trade Count</Label>
+					</Cell>
+				</Row>
+			</Head>
+			<Body>
+				{#each pnlPerVol as { family, pnl, pnlPerTrade, tradeCount }}
+					<Row>
+						<Cell>
+							{getFamilyLabel(family)}
+						</Cell>
+						<Cell>
+							$<Pnl {pnl} />
+						</Cell>
+						<Cell>
+							$<Pnl pnl={pnlPerTrade} />
+						</Cell>
+						<Cell>
+							{tradeCount}
+						</Cell>
+					</Row>
+				{/each}
+			</Body>
+		</DataTable>
+		<div>
+			<a href="/history/v">More...</a>
+		</div>
+	{/if}
 </Paper><br /><Paper>
 	<h3>PnL per watcher type <MoreLink href="/history/t" /></h3>
 	<FormField align="end">
