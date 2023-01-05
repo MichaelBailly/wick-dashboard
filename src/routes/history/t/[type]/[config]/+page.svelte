@@ -4,6 +4,7 @@
 	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import { Period } from '$lib/types/Period';
 	import { VolumeFamilies } from '$lib/volumeReference';
+	import IntervalDateControl from '$lib/widgets/IntervalDateControl.svelte';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import TradesTable from '$lib/widgets/TradesTable.svelte';
 	import Button, { Group, Icon } from '@smui/button';
@@ -48,6 +49,10 @@
 	for (const volumeFamily of VolumeFamilies) {
 		selectedFamily[volumeFamily.name] = true;
 	}
+
+	let url = new URL($page.url);
+
+	$: url = new URL($page.url);
 
 	$: {
 		if (Object.values(selectedFamily).every((v) => v)) {
@@ -109,57 +114,7 @@
 	PnL: $<Pnl {pnl} /> (including fees) - {activeTrades.length} trades
 </h3>
 <h4>
-	<div>
-		<Button
-			href="/history/t/{$page.params.type}/{$page.params.config}?period={stringifyComposedPeriod(
-				getPreviousComposedPeriod(periodObj)
-			)}">
-			<Icon class="material-icons">chevron_left</Icon>
-		</Button>
-		{#if periodObj.unit === Period.Month}
-			{format(periodObj.dates.start, 'LLL yyyy')}
-		{:else if periodObj.unit === Period.Day}
-			{format(periodObj.dates.start, 'yyyy-MM-dd')}
-		{/if}
-		<Button
-			href="/history/t/{$page.params.type}/{$page.params.config}?period={stringifyComposedPeriod(
-				getNextComposedPeriod(periodObj)
-			)}">
-			<Icon class="material-icons">chevron_right</Icon>
-		</Button>
-	</div>
-	<div>
-		<Button
-			href="/history/t/{$page.params.type}/{$page.params.config}?period={stringifyComposedPeriod(
-				getTodayComposedPeriod()
-			)}">
-			<Label>today</Label>
-		</Button>
-		<Button
-			href="/history/t/{$page.params.type}/{$page.params.config}?period={stringifyComposedPeriod(
-				getThisMonthComposedPeriod()
-			)}">
-			<Label>this month</Label>
-		</Button>
-		<Group variant="outlined">
-			<Button
-				href="/history/t/{$page.params.type}/{$page.params.config}?period={stringifyComposedPeriod(
-					changeComposedPeriodUnit(periodObj, Period.Month)
-				)}"
-				color="secondary"
-				disabled={periodObj.unit === Period.Month}>
-				<Label>Monthly</Label>
-			</Button>
-			<Button
-				href="/history/t/{$page.params.type}/{$page.params.config}?period={stringifyComposedPeriod(
-					changeComposedPeriodUnit(periodObj, Period.Day)
-				)}"
-				color="secondary"
-				disabled={periodObj.unit === Period.Day}>
-				<Label>Daily</Label>
-			</Button>
-		</Group>
-	</div>
+	<IntervalDateControl {url} oneLiner={true} />
 </h4>
 <p>
 	<FormField>

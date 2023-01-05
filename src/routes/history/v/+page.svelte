@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { parseMonthStringOrNow } from '$lib/dates';
 	import MoreLink from '$lib/widgets/MoreLink.svelte';
 	import Pnl from '$lib/widgets/Pnl.svelte';
