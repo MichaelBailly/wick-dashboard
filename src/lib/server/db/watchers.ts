@@ -150,7 +150,7 @@ type WDrawdownInternal = {
 };
 
 export async function getDrawdowns(opts: GetDrawdownsOpts): Promise<WatcherDrawdown[]> {
-	if (!opts.watchers || !Array.isArray(opts.watchers)) {
+	if (!opts.watchers || !Array.isArray(opts.watchers) || !opts.watchers.length) {
 		throw new Error('watchers could not be null');
 	}
 
