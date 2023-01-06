@@ -45,7 +45,6 @@
 		tomorrow = format(add(date, { days: 1 }), 'yyyy-MM-dd');
 
 		todaysTrades = data.trades.filter((t) => checked[t.volumeFamily]);
-		todaysTrades.sort((a, b) => b.boughtTimestamp.getTime() - a.boughtTimestamp.getTime());
 		todaysPnl = todaysTrades.reduce((acc: number, t: DashboardTrade) => acc + t.pnl, 0);
 		todaysNetPnl = todaysTrades.reduce((acc: number, t: DashboardTrade) => acc + t.netPnl, 0);
 		todaysFees = todaysPnl - todaysNetPnl;

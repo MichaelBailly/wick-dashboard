@@ -8,6 +8,7 @@
 	import MoreLink from './MoreLink.svelte';
 
 	export let trades: DashboardTrade[];
+	let sortedTrades: DashboardTrade[] = [];
 
 	const rowsPerPage = 100;
 
@@ -16,7 +17,10 @@
 	let rows: DashboardTrade[] = [];
 
 	$: {
-		rows = trades.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+		sortedTrades = [...trades].sort(
+			(a, b) => b.boughtTimestamp.getTime() - a.boughtTimestamp.getTime()
+		);
+		rows = sortedTrades.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
 		showPagination = trades.length > rowsPerPage;
 	}
 </script>
