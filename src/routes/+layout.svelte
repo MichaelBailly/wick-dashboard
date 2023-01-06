@@ -9,6 +9,9 @@
 	import 'material-icons/iconfont/material-icons.css';
 
 	import { readFamilySource } from '$lib/stores/familySource';
+	import { lightInterface } from '$lib/stores/lightInterface';
+	import FormField from '@smui/form-field';
+	import Switch from '@smui/switch';
 
 	readFamilySource();
 </script>
@@ -16,6 +19,10 @@
 <div class="page-container">
 	<Drawer>
 		<Content>
+			<FormField>
+				<Switch bind:checked={$lightInterface} />
+				<span slot="label">Light interface</span>
+			</FormField>
 			<List>
 				<Item href="/">
 					<Text>Home</Text>

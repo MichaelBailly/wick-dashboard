@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import type { PnlPerDay } from '$lib/server/db/trades';
+	import { lightInterface } from '$lib/stores/lightInterface';
 	import IntervalDateControl from '$lib/widgets/IntervalDateControl.svelte';
 	import PnlFamilyPerMonth from '$lib/widgets/PnlFamilyPerMonth.svelte';
 	import PnlPerDayGraph from './PnlPerDayGraph.svelte';
@@ -27,7 +28,9 @@
 		<IntervalDateControl {url} oneLiner={true} controlSpace={true} />
 	</div>
 </div>
-<PnlFamilyPerMonth {months} />
+{#if !$lightInterface}
+	<PnlFamilyPerMonth {months} />
+{/if}
 
 <style>
 	:root {
