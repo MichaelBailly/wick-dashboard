@@ -7,23 +7,13 @@
 	import IntervalDateControl from '$lib/widgets/IntervalDateControl.svelte';
 	import Pnl from '$lib/widgets/Pnl.svelte';
 	import TradesTable from '$lib/widgets/TradesTable.svelte';
-	import Button, { Group, Icon } from '@smui/button';
 	import Checkbox from '@smui/checkbox';
 	import FormField from '@smui/form-field';
 	import Radio from '@smui/radio';
 	import Tab, { Label } from '@smui/tab';
 	import TabBar from '@smui/tab-bar';
 	import { format } from 'date-fns';
-	import {
-		changeComposedPeriodUnit,
-		getNextComposedPeriod,
-		getPreviousComposedPeriod,
-		getThisMonthComposedPeriod,
-		getTodayComposedPeriod,
-		parseComposedPeriod,
-		stringifyComposedPeriod,
-		type ComposedPeriod
-	} from './helpers';
+	import { getThisMonthComposedPeriod, parseComposedPeriod, type ComposedPeriod } from './helpers';
 	import PnlGraph from './PnlGraph.svelte';
 	import VolSuccessRateGraph from './VolSuccessRateGraph.svelte';
 
