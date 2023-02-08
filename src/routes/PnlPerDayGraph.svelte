@@ -61,7 +61,9 @@
 			chart.data.datasets[0].data = pnl;
 			// @ts-ignore
 			chart.data.datasets[1].data = cumulatedPnl;
-
+			chart.data.datasets[1].label = `Cumulated Pnl: $${cumulatedPnl[
+				cumulatedPnl.length - 1
+			]?.y.toFixed(2)}`;
 			chart.update();
 		}
 	}
@@ -89,7 +91,7 @@
 					},
 					{
 						type: 'line',
-						label: 'Cumulated Pnl',
+						label: `Cumulated Pnl: $${cumulatedPnl[cumulatedPnl.length - 1]?.y.toFixed(2)}`,
 						data: cumulatedPnl,
 						backgroundColor: 'rgb(0, 131, 143)',
 						borderColor: 'rgba(0, 131, 143, 0.5)',
@@ -109,7 +111,7 @@
 						type: 'time',
 						distribution: 'linear',
 						title: {
-							display: true,
+							display: false,
 							text: 'Date'
 						},
 						grid: {
