@@ -139,9 +139,6 @@
 <div class="tab-content">
 	{#if activeTab === 'Graph'}
 		<PnlGraph trades={activeTrades} />
-		<p>
-			<VolSuccessRateGraph trades={activeTrades} />
-		</p>
 	{:else if activeTab === 'Data'}
 		<TradesTable trades={activeTrades} />
 	{/if}
