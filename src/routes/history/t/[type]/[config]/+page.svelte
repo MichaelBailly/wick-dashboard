@@ -15,7 +15,6 @@
 	import { format } from 'date-fns';
 	import { getThisMonthComposedPeriod, parseComposedPeriod, type ComposedPeriod } from './helpers';
 	import PnlGraph from './PnlGraph.svelte';
-	import VolSuccessRateGraph from './VolSuccessRateGraph.svelte';
 
 	export let data: { trades: DashboardTrade[] };
 
