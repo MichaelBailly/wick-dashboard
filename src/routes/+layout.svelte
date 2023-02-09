@@ -20,7 +20,7 @@
 	<Drawer>
 		<Content>
 			<FormField>
-				<Switch bind:checked={$lightInterface} />
+				<Switch size="small" bind:checked={$lightInterface} />
 				<span slot="label">Light interface</span>
 			</FormField>
 			<List>
