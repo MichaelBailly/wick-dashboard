@@ -3,9 +3,9 @@ import { format } from 'date-fns';
 export function getAtMidnightUTC(year: number, month: number, day: number): Date {
 	const d = new Date();
 	d.setUTCHours(0, 0, 0, 0);
-	d.setDate(day);
 	d.setFullYear(year);
 	d.setMonth(month - 1);
+	d.setDate(day);
 	return d;
 }
 
