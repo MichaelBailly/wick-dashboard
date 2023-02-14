@@ -203,7 +203,6 @@ export async function getPnlPerCMCFamily(
 		.toArray();
 
 	const result = response.map((item) => {
-		console.log(item);
 		const [family, watcherType, watcherConfig] = item._id.split(' ');
 		return {
 			watcher: {

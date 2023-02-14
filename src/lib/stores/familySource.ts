@@ -18,7 +18,6 @@ function getFamilySourceStore() {
 			set(value as FamilySource);
 			try {
 				if (localStorage) {
-					console.log('setFamilySource', value);
 					localStorage.setItem('familySource', storeValue);
 				}
 			} catch (e) {
@@ -49,13 +48,3 @@ export function readFamilySource() {
 		familySource.set(source);
 	}
 }
-
-/*
-count.subscribe(value => {
-	console.log(value);
-}); // logs '0'
-
-count.set(1); // logs '1'
-
-count.update(n => n + 1); // logs '2'
-*/
