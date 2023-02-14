@@ -214,3 +214,15 @@ export function changeComposedPeriodUnit(period: ComposedPeriod, unit: Period): 
 		}
 	};
 }
+
+export function getHumanComposedPeriod(period: ComposedPeriod): string {
+	if (period.unit === Period.Day) {
+		return format(period.dates.start, 'dd MMMM yyyy');
+	} else if (period.unit === Period.Week) {
+		return `${format(period.dates.start, 'dd MMMM yyyy')} - ${format(
+			period.dates.end,
+			'dd MMMM yyyy'
+		)}`;
+	}
+	return format(period.dates.start, 'MMMM yyyy');
+}

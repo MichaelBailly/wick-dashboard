@@ -13,9 +13,11 @@
 	import Tab from '@smui/tab';
 	import TabBar from '@smui/tab-bar';
 	import { format } from 'date-fns';
+	import PnlPerDayGraph from '../PnlPerDayGraph.svelte';
 	import type { PageData } from './$types';
 	import { computePnlPerType, type PnlPerVol } from './helpers';
 	import {
+		getHumanComposedPeriod,
 		getNextComposedPeriod,
 		getPreviousComposedPeriod,
 		getThisMonthComposedPeriod,
@@ -45,6 +47,8 @@
 				periodObj = composed;
 			}
 		}
+
+		period = getHumanComposedPeriod(periodObj);
 
 		const prevComposedPeriod = getPreviousComposedPeriod(periodObj);
 		const nextComposedPeriod = getNextComposedPeriod(periodObj);
@@ -92,6 +96,9 @@
 	</div>
 </div>
 
+<center>
+	<PnlPerDayGraph pnlPerDay={data.pnlPerDay} />
+</center>
 <Paper>
 	<TabBar tabs={['cmc', 'volume']} let:tab bind:active={activeTab}>
 		<!-- Note: the `tab` property is required! -->
@@ -226,5 +233,8 @@
 
 	h3 {
 		margin-top: 0;
+	}
+	center {
+		margin: 1rem 0;
 	}
 </style>
