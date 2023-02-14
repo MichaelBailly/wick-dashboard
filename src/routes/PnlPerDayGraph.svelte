@@ -185,6 +185,7 @@
 					if (!chart) {
 						return;
 					}
+					// @ts-ignore
 					const points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
 
 					if (points.length) {

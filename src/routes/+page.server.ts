@@ -1,16 +1,27 @@
-import { getPnlPerDay } from '$lib/server/db/trades';
-import type { URL } from 'url';
+import { getThisMonthComposedPeriod, parseComposedPeriod } from '$lib/composedPeriod';
+import { ensureReferencesAreLoaded } from '$lib/server/dashboardTradeConverter';
 import {
-	getThisMonthComposedPeriod,
-	parseComposedPeriod
-} from './history/t/[type]/[config]/helpers';
-/** @type {import('./$types').PageServerLoad} */
-export async function load({ url }: { url: URL }) {
-	const period: string = url.searchParams.get('period') || '';
-	const composed = parseComposedPeriod(period) || getThisMonthComposedPeriod();
-	const pnlPerDay = await getPnlPerDay(composed.dates);
+	getPnlPerCmcFamily,
+	getPnlPerDay,
+	getPnlPerVolumeFamily,
+	getTradePnl
+} from '$lib/server/db/trades';
+import type { ServerLoadEvent } from '@sveltejs/kit';
+import { add, format } from 'date-fns';
+// import type { PageServerLoad } from './$types';
+
+export async function load({ url }: ServerLoadEvent) {
+	const period = url.searchParams.get('period');
+	const composedPeriod = parseComposedPeriod(period || '') || getThisMonthComposedPeriod();
+	const realPeriod = format(add(composedPeriod.dates.start, { days: 10 }), 'yyyy-MM');
+
+	await ensureReferencesAreLoaded();
 
 	return {
-		pnlPerDay
+		period: realPeriod,
+		pnlPerVol: getPnlPerVolumeFamily(composedPeriod.dates),
+		pnlPerType: getTradePnl(composedPeriod.dates),
+		pnlPerDay: getPnlPerDay(composedPeriod.dates),
+		pnlPerCmc: getPnlPerCmcFamily(composedPeriod.dates)
 	};
 }

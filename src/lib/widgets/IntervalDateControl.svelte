@@ -2,8 +2,6 @@
 	import { page } from '$app/stores';
 	import { Period } from '$lib/types/Period';
 
-	import Button, { Group, Icon, Label } from '@smui/button';
-	import { format } from 'date-fns';
 	import {
 		changeComposedPeriodUnit,
 		getNextComposedPeriod,
@@ -11,11 +9,10 @@
 		getThisMonthComposedPeriod,
 		getTodayComposedPeriod,
 		parseComposedPeriod,
-		stringifyComposedPeriod,
-		type ComposedPeriod
-	} from '../../routes/history/t/[type]/[config]/helpers';
-
-	export let periodObj: ComposedPeriod = getThisMonthComposedPeriod();
+		stringifyComposedPeriod
+	} from '$lib/composedPeriod';
+	import Button, { Group, Icon, Label } from '@smui/button';
+	import { format } from 'date-fns';
 	export let url: URL;
 	export let searchParamKey: string = 'period';
 
@@ -24,6 +21,7 @@
 
 	const tag = '__REPLACEMENT__';
 
+	let periodObj = getThisMonthComposedPeriod();
 	let urlBase: Function = (str: string) => {
 		return str;
 	};

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { getThisMonthComposedPeriod, parseComposedPeriod } from '$lib/composedPeriod';
 	import { FamilySource, familySource } from '$lib/stores/familySource';
+	import type { ComposedPeriod } from '$lib/types/ComposedPeriod';
 	import type { DashboardTrade } from '$lib/types/DashboardTrade';
 	import { Period } from '$lib/types/Period';
 	import { VolumeFamilies } from '$lib/volumeReference';
@@ -13,7 +15,7 @@
 	import Tab, { Label } from '@smui/tab';
 	import TabBar from '@smui/tab-bar';
 	import { format } from 'date-fns';
-	import { getThisMonthComposedPeriod, parseComposedPeriod, type ComposedPeriod } from './helpers';
+
 	import PnlGraph from './PnlGraph.svelte';
 
 	export let data: { trades: DashboardTrade[] };

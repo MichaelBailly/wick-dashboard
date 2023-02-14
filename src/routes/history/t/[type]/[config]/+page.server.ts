@@ -1,10 +1,10 @@
+import { parseComposedPeriod } from '$lib/composedPeriod';
 import { getAtMidnightUTC, getDateAtMidnightUTC, getTodayAtMidnightUTC } from '$lib/dates';
 import { ensureReferencesAreLoaded, toDashboardTrade } from '$lib/server/dashboardTradeConverter';
 import { getTradesParallel } from '$lib/server/getTradesParallel';
 import type { DashboardTrade } from '$lib/types/DashboardTrade';
 import type { HistoryTypeLoadArgs } from '$lib/types/HistoryTypeLoadArgs';
 import { add, startOfMonth } from 'date-fns';
-import { parseComposedPeriod } from './helpers';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ url, params }: HistoryTypeLoadArgs) {
