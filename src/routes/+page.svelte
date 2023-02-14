@@ -81,9 +81,9 @@
 </svelte:head>
 
 <div class="head-container">
-	<h1>
+	<h2>
 		{period}
-	</h1>
+	</h2>
 	<div class="head-date-picker">
 		<Button href="/?period={prevPeriod.machine}">
 			<Icon class="material-icons">chevron_left</Icon>
@@ -235,6 +235,6 @@
 		margin-top: 0;
 	}
 	center {
-		margin: 1rem 0;
+		margin-bottom: 1rem;
 	}
 </style>
