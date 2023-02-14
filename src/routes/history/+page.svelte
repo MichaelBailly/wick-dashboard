@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { parseMonthStringOrNow } from '$lib/dates';
+	import { page } from '$app/stores';
 	import { FamilySource, familySource } from '$lib/stores/familySource';
 	import type { PnlPerType } from '$lib/types/PnlPerType';
 	import { getFamilyLabel } from '$lib/volumeReference';
@@ -12,9 +12,16 @@
 	import Switch from '@smui/switch';
 	import Tab from '@smui/tab';
 	import TabBar from '@smui/tab-bar';
-	import { add, format } from 'date-fns';
+	import { format } from 'date-fns';
 	import type { PageData } from './$types';
 	import { computePnlPerType, type PnlPerVol } from './helpers';
+	import {
+		getNextComposedPeriod,
+		getPreviousComposedPeriod,
+		getThisMonthComposedPeriod,
+		parseComposedPeriod,
+		stringifyComposedPeriod
+	} from './t/[type]/[config]/helpers';
 
 	export let data: PageData;
 
@@ -27,21 +34,28 @@
 	let showNegativePnL = false;
 	let pnlPerVol: PnlPerVol[] = [];
 	let pnlPerType: PnlPerType[] = [];
-
+	let periodObj = getThisMonthComposedPeriod();
 	$: {
 		// dates navigation
-		const [year, month] = parseMonthStringOrNow(data.period);
-		const thisMonthDate = new Date(year, month - 1, 10);
-		period = format(thisMonthDate, 'MMMM yyyy');
-		const nextMonthDate = add(thisMonthDate, { months: 1 });
-		const prevMonthDate = add(thisMonthDate, { months: -1 });
+		periodObj = getThisMonthComposedPeriod();
+		const urlPeriod = $page.url.searchParams.get('period');
+		if (urlPeriod) {
+			const composed = parseComposedPeriod(urlPeriod);
+			if (composed) {
+				periodObj = composed;
+			}
+		}
+
+		const prevComposedPeriod = getPreviousComposedPeriod(periodObj);
+		const nextComposedPeriod = getNextComposedPeriod(periodObj);
+
 		prevPeriod = {
-			human: format(prevMonthDate, 'MMMM yyyy'),
-			machine: format(prevMonthDate, 'yyyy-MM')
+			human: format(prevComposedPeriod.dates.start, 'MMMM yyyy'),
+			machine: stringifyComposedPeriod(prevComposedPeriod)
 		};
 		nextPeriod = {
-			human: format(nextMonthDate, 'MMMM yyyy'),
-			machine: format(nextMonthDate, 'yyyy-MM')
+			human: format(nextComposedPeriod.dates.start, 'MMMM yyyy'),
+			machine: stringifyComposedPeriod(nextComposedPeriod)
 		};
 
 		// results formatting
